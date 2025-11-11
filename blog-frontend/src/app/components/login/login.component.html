@@ -1,0 +1,41 @@
+<div class="login-wrapper">
+  <div class="login-page">
+    <div class="scary-face">
+      <div class="eye" id="eye-left">
+        <div class="pupil"></div>
+      </div>
+      <div class="eye" id="eye-right">
+        <div class="pupil"></div>
+      </div>
+      <div class="mouth" id="mouth"></div>
+    </div>
+
+    <div class="form-container">
+      <h4>ENTER THE DARKNES</h4>
+      <br>
+      <form (ngSubmit)="onSubmit()" class="login-form">
+        <input
+          type="text"
+          name="usernameOrEmail"
+          [(ngModel)]="loginData.usernameOrEmail"
+          placeholder="Username or Email"
+        />
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="loginData.password"
+          placeholder="Password"
+          (focus)="onPasswordFocus()"
+          (blur)="onPasswordBlur()"
+        />
+        <button type="submit" [disabled]="loading">Login</button>
+        <p class="error" *ngIf="error">{{ error }}</p>
+      </form>
+      
+      <!-- Register Link -->
+      <div class="register-link">
+        <p>Don't have an account? <a routerLink="/register">Sign up here</a></p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,118 @@
+<div class="register-container">
+  <div class="register-page">
+    <div class="scary-face">
+      <div class="eye" id="eye-left">
+        <div class="pupil"></div>
+      </div>
+      <div class="eye" id="eye-right">
+        <div class="pupil"></div>
+      </div>
+      <div class="mouth" id="mouth"></div>
+    </div>
+
+    <div class="register-card">
+      <h2>Join 01Blog</h2>
+      <p class="subtitle">Share your learning journey with others</p>
+    
+    <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="register-form">
+      <!-- Username Field -->
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username"
+          [(ngModel)]="registerData.username"
+          name="username"
+          placeholder="Choose a unique username"
+          required
+          minlength="3"
+          class="form-input"
+          #usernameField="ngModel">
+        <div *ngIf="usernameField.invalid && usernameField.touched" class="field-error">
+          Username must be at least 3 characters
+        </div>
+      </div>
+      
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email"
+          [(ngModel)]="registerData.email"
+          name="email"
+          placeholder="your.email@example.com"
+          required
+          email
+          class="form-input"
+          #emailField="ngModel">
+        <div *ngIf="emailField.invalid && emailField.touched" class="field-error">
+          Please enter a valid email address
+        </div>
+      </div>
+      
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password"
+          [(ngModel)]="registerData.password"
+          name="password"
+          placeholder="Create a strong password"
+          required
+          minlength="6"
+          class="form-input"
+          (focus)="onPasswordFocus()"
+          (blur)="onPasswordBlur()"
+          #passwordField="ngModel">
+        <div *ngIf="passwordField.invalid && passwordField.touched" class="field-error">
+          Password must be at least 6 characters
+        </div>
+      </div>
+      
+      <!-- Confirm Password Field -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input 
+          type="password" 
+          id="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          placeholder="Confirm your password"
+          required
+          (focus)="onPasswordFocus()"
+          (blur)="onPasswordBlur()"
+          class="form-input">
+        <div *ngIf="confirmPassword && registerData.password !== confirmPassword" class="field-error">
+          Passwords do not match
+        </div>
+      </div>
+      
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message">
+        ⚠️ {{ error }}
+      </div>
+      
+      <!-- Success Message -->
+      <div *ngIf="success" class="success-message">
+        ✅ {{ success }}
+      </div>
+      
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        class="register-button"
+        [disabled]="loading || !registerForm.valid || registerData.password !== confirmPassword">
+        <span *ngIf="loading">🔄 Creating Account...</span>
+        <span *ngIf="!loading">🚀 Create Account</span>
+      </button>
+    </form>
+    
+    <!-- Login Link -->
+    <div class="login-link">
+      <p>Already have an account? <a routerLink="/login">Sign in here</a></p>
+    </div>
+  </div>
+  </div>
+</div>
