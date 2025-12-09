@@ -1,14 +1,16 @@
 package com._blog._blog.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "subscriptions", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"subscriber_id", "subscribed_to_id"})
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Subscription {
     

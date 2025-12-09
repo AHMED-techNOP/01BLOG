@@ -82,6 +82,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints (no authentication required)
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers("/uploads/**").permitAll()  // Allow public access to uploaded media
                 
                 // Protected endpoints (authentication required)
                 .requestMatchers("/api/user/**").authenticated()      // User profile endpoints

@@ -1,14 +1,17 @@
 package com._blog._blog.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "posts")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Post {
     
@@ -20,6 +23,9 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
+    @Column(nullable = false)
+    private String title;
+    
     @Column(columnDefinition = "TEXT")
     private String description;
     
@@ -30,18 +36,22 @@ public class Post {
     private LocalDateTime createdAt = LocalDateTime.now();
     
     // One-to-many relationships
+    @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
     
+    @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Like> likes;
     
+    @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notification> notifications;
     
     // Custom constructor
-    public Post(User user, String description, String mediaUrl) {
+    public Post(User user, String title, String description, String mediaUrl) {
         this.user = user;
+        this.title = title;
         this.description = description;
         this.mediaUrl = mediaUrl;
         this.createdAt = LocalDateTime.now();

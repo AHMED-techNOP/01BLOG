@@ -1,13 +1,15 @@
 package com._blog._blog.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reports")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Report {
     

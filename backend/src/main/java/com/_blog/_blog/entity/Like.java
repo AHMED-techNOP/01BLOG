@@ -1,14 +1,16 @@
 package com._blog._blog.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "likes", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"post_id", "user_id"})
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Like {
     
