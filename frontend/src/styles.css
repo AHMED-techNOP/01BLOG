@@ -10,6 +10,68 @@ body, html {
   padding: 0;
   height: 100%;
   width: 100%;
-  background-color: #000;
+  background: transparent;
   overflow-x: hidden;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Custom Material Theme Overrides - Dark/Red Theme */
+:root {
+  --primary-color: #ff2e2e;
+  --primary-dark: #7b0000;
+  --background-dark: #121212;
+  --background-black: #000;
+  --text-primary: #fff;
+  --text-secondary: #999;
+  --border-color: #7b0000;
+  --error-color: #ff6b6b;
+}
+
+/* Material Dialog/Modal Customization */
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: var(--background-dark) !important;
+  background: var(--background-dark) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 0 50px rgba(255, 0, 0, 0.3) !important;
+}
+
+/* Material Form Field Customization */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-text-field-wrapper {
+  background-color: var(--background-black) !important;
+}
+
+.mat-mdc-form-field .mat-mdc-input-element {
+  color: var(--text-primary) !important;
+  caret-color: var(--primary-color) !important;
+}
+
+.mat-mdc-form-field-focus-overlay {
+  background-color: transparent !important;
+}
+
+/* Material Button Customization */
+.mat-mdc-raised-button.mat-primary {
+  --mdc-protected-button-container-color: var(--primary-color) !important;
+  --mdc-protected-button-label-text-color: #111 !important;
+}
+
+.mat-mdc-raised-button.mat-primary:hover {
+  background-color: darkred !important;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.5) !important;
+}
+
+/* Material Icon Button */
+.mat-mdc-icon-button {
+  color: var(--primary-color) !important;
+}
+
+.mat-mdc-icon-button:hover {
+  color: var(--error-color) !important;
+}
+

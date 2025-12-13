@@ -1,0 +1,47 @@
+<div class="report-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>flag</mat-icon>
+    Report Post
+  </h2>
+
+  <mat-dialog-content>
+    <div class="report-info">
+      <p><strong>Post:</strong> {{ data.postTitle }}</p>
+      <p><strong>Author:</strong> {{ '@' + data.postUsername }}</p>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reason for reporting</mat-label>
+      <mat-select [(ngModel)]="reason" required>
+        <mat-option *ngFor="let reportReason of reportReasons" [value]="reportReason">
+          {{ reportReason }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="reason === 'Other'" appearance="outline" class="full-width">
+      <mat-label>Please describe the issue</mat-label>
+      <textarea 
+        matInput 
+        [(ngModel)]="customReason" 
+        rows="4"
+        placeholder="Provide details about why you're reporting this post..."
+        required>
+      </textarea>
+    </mat-form-field>
+
+    <div class="warning-message">
+      <mat-icon>info</mat-icon>
+      <p>Reports are reviewed by our moderation team. False reports may result in action against your account.</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="loading">Cancel</button>
+    <button mat-raised-button color="warn" (click)="onSubmit()" [disabled]="loading">
+      <mat-icon *ngIf="!loading">flag</mat-icon>
+      <span *ngIf="loading">Submitting...</span>
+      <span *ngIf="!loading">Submit Report</span>
+    </button>
+  </mat-dialog-actions>
+</div>

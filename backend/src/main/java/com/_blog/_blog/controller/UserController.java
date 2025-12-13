@@ -3,6 +3,9 @@ package com._blog._blog.controller;
 import com._blog._blog.entity.Post;
 import com._blog._blog.entity.User;
 import com._blog._blog.repository.PostRepository;
+import com._blog._blog.repository.LikeRepository;
+import com._blog._blog.repository.CommentRepository;
+import com._blog._blog.repository.SubscriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,9 +24,17 @@ public class UserController {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private LikeRepository likeRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private SubscriptionRepository subscriptionRepository;
+
     /**
-     * Get posts for the dashboard (currently returns all posts)
-     * TODO: Filter by subscribed users when subscription feature is implemented
+     * Get posts for the dashboard (only from subscribed users)
      */
     @GetMapping("/me")
     @Transactional
@@ -32,11 +43,19 @@ public class UserController {
             return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
         }
         
-        // For now, return all posts ordered by creation date
-        // TODO: Later filter by subscribed users only
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
+        // Get IDs of users that the current user is subscribed to
+        List<Long> subscribedUserIds = subscriptionRepository.findSubscribedToUserIds(user.getId());
         
-        // Convert to DTOs to avoid lazy loading issues and include username
+        // Fetch posts only from subscribed users, or all posts if not subscribed to anyone
+        List<Post> posts;
+        if (subscribedUserIds.isEmpty()) {
+            // If user is not subscribed to anyone, show all posts
+            posts = postRepository.findAllByOrderByCreatedAtDesc();
+        } else {
+            posts = postRepository.findByUserIdInOrderByCreatedAtDesc(subscribedUserIds);
+        }
+        
+        // Convert to DTOs to avoid lazy loading issues and include username and like info
         List<Map<String, Object>> postDTOs = posts.stream().map(post -> {
             Map<String, Object> dto = new HashMap<>();
             dto.put("id", post.getId());
@@ -45,6 +64,9 @@ public class UserController {
             dto.put("mediaUrl", post.getMediaUrl() != null ? post.getMediaUrl() : "");
             dto.put("createdAt", post.getCreatedAt());
             dto.put("username", post.getUser().getUsername());
+            dto.put("likeCount", likeRepository.countByPost(post));
+            dto.put("isLiked", likeRepository.existsByPostAndUser(post, user));
+            dto.put("commentCount", commentRepository.countByPost(post));
             return dto;
         }).collect(Collectors.toList());
         

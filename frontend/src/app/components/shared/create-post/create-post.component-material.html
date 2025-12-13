@@ -1,0 +1,105 @@
+<div class="create-post-modal">
+  <div class="modal-content">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2>{{ editingPost ? 'Edit Post' : 'Create New Post' }}</h2>
+      <button mat-icon-button (click)="onCancel()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="post-form">
+      <!-- Title Input - Material -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title</mat-label>
+        <input
+          matInput
+          [(ngModel)]="title"
+          name="title"
+          placeholder="Enter post title..."
+          required
+        />
+        <mat-icon matPrefix>title</mat-icon>
+      </mat-form-field>
+
+      <!-- Content Textarea - Material -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Content</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="content"
+          name="content"
+          placeholder="What's on your mind?"
+          rows="6"
+          required
+        ></textarea>
+        <mat-icon matPrefix>description</mat-icon>
+      </mat-form-field>
+
+      <!-- Media Upload -->
+      <div class="form-group">
+        <label>Media (Image or Video)</label>
+        <p class="file-size-hint">Max: 10MB for images, 50MB for videos</p>
+        <div class="media-upload">
+          <input
+            type="file"
+            id="mediaFile"
+            (change)="onFileSelected($event)"
+            accept="image/*,video/*"
+            class="file-input"
+            #fileInput
+          />
+          <button
+            mat-raised-button
+            color="accent"
+            type="button"
+            (click)="fileInput.click()"
+            *ngIf="!mediaPreview"
+          >
+            <mat-icon>attach_file</mat-icon>
+            Choose File
+          </button>
+        </div>
+
+        <!-- Media Preview -->
+        <div class="media-preview" *ngIf="mediaPreview">
+          <button mat-icon-button class="remove-media" (click)="removeMedia($event)">
+            <mat-icon>close</mat-icon>
+          </button>
+          <img
+            *ngIf="mediaType === 'image'"
+            [src]="mediaPreview"
+            alt="Preview"
+            class="preview-image"
+          />
+          <video
+            *ngIf="mediaType === 'video'"
+            [src]="mediaPreview"
+            class="preview-video"
+            controls
+          ></video>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message">
+        <mat-icon>warning</mat-icon>
+        {{ error }}
+      </div>
+
+      <!-- Action Buttons - Material -->
+      <div class="form-actions">
+        <button mat-raised-button type="button" (click)="onCancel()">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+          <mat-spinner *ngIf="loading" diameter="20" class="button-spinner"></mat-spinner>
+          <span *ngIf="!loading">
+            <mat-icon>{{ editingPost ? 'save' : 'add' }}</mat-icon>
+            {{ editingPost ? 'Update Post' : 'Create Post' }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

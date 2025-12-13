@@ -1,0 +1,59 @@
+<div class="profile-container">
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading">
+    <mat-spinner color="warn"></mat-spinner>
+    <p>Loading profile...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error && !loading" class="error-message">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="warn" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Dashboard
+    </button>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!loading && !error" class="profile-layout">
+    <!-- Left Sidebar - User Profile Info -->
+    <app-profile-sidebar
+      [username]="username"
+      [subscriberCount]="subscriberCount"
+      [subscriptionCount]="subscriptionCount"
+      [postCount]="posts.length"
+      [isCurrentUser]="isCurrentUser()"
+      [isSubscribed]="isSubscribed"
+      [loadingSubscription]="loadingSubscription"
+      [showBackButton]="true"
+      [autoLoadStats]="false"
+      (backClicked)="goBack()"
+      (subscriptionToggled)="toggleSubscription()">
+    </app-profile-sidebar>
+
+    <!-- Right Content - User's Posts -->
+    <main class="posts-section">
+      
+
+      <div *ngIf="posts.length === 0" class="no-posts">
+        <mat-icon>post_add</mat-icon>
+        <p>No posts yet</p>
+        <p class="no-posts-hint">{{ isCurrentUser() ? 'Create your first post!' : 'This user hasn\'t posted anything yet.' }}</p>
+      </div>
+
+      <div class="posts-list">
+        <app-post-card 
+          *ngFor="let post of posts" 
+          [post]="post"
+          [currentUser]="currentUser"
+          (likeToggled)="toggleLike($event)"
+          (commentsToggled)="toggleComments($event)"
+          (commentAdded)="addComment($event)"
+          (commentDeleted)="onCommentDeleted($event)"
+          (usernameClicked)="viewUserProfile($event)">
+        </app-post-card>
+      </div>
+    </main>
+  </div>
+</div>

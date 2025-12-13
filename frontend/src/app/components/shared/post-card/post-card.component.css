@@ -1,0 +1,240 @@
+/* Material Card styling */
+.post-card {
+  background: #000000 !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s !important;
+}
+
+.post-card:hover {
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.4) !important;
+}
+
+.post-card ::ng-deep .mat-mdc-card-header {
+  background: transparent !important;
+  padding: 16px;
+}
+
+.post-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.post-author {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.author-name {
+  color: #dddddd;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.author-name.clickable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.author-name.clickable:hover {
+  color: #ff5555;
+  text-shadow: 0 0 10px rgba(255, 46, 46, 0.5);
+  text-decoration: underline;
+}
+
+.post-date {
+  color: #999;
+  font-size: 12px;
+}
+
+.post-card ::ng-deep .mat-mdc-card-content {
+  color: #fff !important;
+  padding: 16px;
+}
+
+.post-card h3 {
+  color: #e91e63;
+  font-size: 20px;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.post-card p {
+  color: #fff;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.post-media {
+  margin-top: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.post-media img,
+.post-media video {
+  width: 100%;
+  display: block;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Like button styling */
+.post-card ::ng-deep .mat-mdc-card-actions {
+  padding: 8px 16px;
+}
+
+.post-card ::ng-deep mat-card-actions button {
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.post-card ::ng-deep mat-card-actions button:hover {
+  color: #898989;
+}
+
+.post-card ::ng-deep mat-card-actions button.liked {
+  color: #ff2e2e;
+}
+
+.post-card ::ng-deep mat-card-actions button.liked mat-icon {
+  color: #ff2e2e;
+  animation: likeAnimation 0.3s ease-in-out;
+}
+
+@keyframes likeAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Comments Section */
+.comments-section {
+  padding: 16px;
+  background: #000215;
+}
+
+.comment-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.comment-input input {
+  flex: 1;
+  padding: 10px 15px;
+  background: #1a1a1a;
+  border: 1px solid #353535;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.comment-input input:focus {
+  border-color: #636363;
+}
+
+.comment-input input::placeholder {
+  color: #666;
+}
+
+.loading-comments {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.comment-item {
+  padding: 12px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.comment-username {
+  color: #ff2e2e;
+  font-weight: 50;
+  font-size: 14px;
+}
+
+.comment-username.clickable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comment-username.clickable:hover {
+  color: #ff5555;
+  text-shadow: 0 0 10px rgba(255, 46, 46, 0.5);
+  text-decoration: underline;
+}
+
+.comment-date {
+  color: #666;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.delete-comment-btn {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.delete-comment-btn:hover {
+  opacity: 1;
+}
+
+.delete-comment-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #ff2e2e;
+}
+
+.comment-content {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Material menu customization */
+.delete-btn {
+  color: #ff2e2e !important;
+}

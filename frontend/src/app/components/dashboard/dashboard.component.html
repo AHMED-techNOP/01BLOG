@@ -1,58 +1,43 @@
 <div class="dashboard-container">
+  <!-- Loading Spinner -->
   <div *ngIf="loading" class="loading">
+    <mat-spinner color="warn"></mat-spinner>
     <p>Loading dashboard...</p>
   </div>
 
-  <div *ngIf="!loading">
-    <header class="dashboard-header">
-      <h1>marhbaaa</h1>
-      <div class="user-info" *ngIf="user">
-        <button class="create-post-btn" (click)="openCreatePost()">Create Post</button>
-        <button class="logout-btn" (click)="logout()">Logout</button>
-      </div>
-    </header>
+  <div *ngIf="!loading" class="dashboard-layout">
+    <!-- Left Sidebar - Profile -->
+    <app-profile-sidebar
+      [username]="user?.username"
+      [isCurrentUser]="true"
+      [showViewProfileButton]="true"
+      (viewProfileClicked)="viewMyProfile()">
+    </app-profile-sidebar>
 
+    <!-- Right Content - Posts Feed -->
     <main class="dashboard-content">
-      <!-- Posts Feed -->
       <div class="posts-feed">
         
         <div *ngIf="posts.length === 0" class="no-posts">
-          <p>No posts yet. Be the first to create one!</p>
+          <mat-icon>post_add</mat-icon>
+          <p>No posts from subscribed users yet</p>
+          <p class="no-posts-hint">Subscribe to users to see their posts here</p>
         </div>
 
         <div class="posts-list">
-          <div *ngFor="let post of posts" class="post-card" (click)="closeMenu()">
-            <div class="post-header">
-              <div class="post-author">
-                <span class="author-name">{{ post.username }}</span>
-                <span class="post-date">{{ post.createdAt | date:'medium' }}</span>
-              </div>
-              
-              <!-- Three-dot menu for current user's posts -->
-              <div *ngIf="isCurrentUserPost(post)" class="post-menu">
-                <button class="menu-btn" (click)="toggleMenu(post.id, $event)">
-                  <span>⋮</span>
-                </button>
-                <div *ngIf="activeMenuPostId === post.id" class="menu-dropdown">
-                  <button (click)="editPost(post)">Edit</button>
-                  <button (click)="deletePost(post.id)" class="delete-btn">Delete</button>
-                </div>
-              </div>
-            </div>
-            
-            <div class="post-content">
-              <h3>{{ post.title }}</h3>
-              <p>{{ post.description }}</p>
-              
-              <div *ngIf="post.mediaUrl" class="post-media">
-                <img *ngIf="isImage(post.mediaUrl)" [src]="'http://localhost:8080' + post.mediaUrl" [alt]="post.title">
-                <video *ngIf="isVideo(post.mediaUrl)" controls>
-                  <source [src]="'http://localhost:8080' + post.mediaUrl">
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            </div>
-          </div>
+          <!-- Post Card Component -->
+          <app-post-card 
+            *ngFor="let post of posts" 
+            [post]="post"
+            [currentUser]="user"
+            (likeToggled)="toggleLike($event)"
+            (commentsToggled)="toggleComments($event)"
+            (commentAdded)="addComment($event)"
+            (commentDeleted)="onCommentDeleted($event)"
+            (postEdited)="editPost($event)"
+            (postDeleted)="deletePost($event)"
+            (usernameClicked)="viewUserProfile($event)">
+          </app-post-card>
         </div>
       </div>
     </main>

@@ -1,0 +1,103 @@
+<mat-card class="post-card">
+  <mat-card-header>
+    <div class="post-header-content">
+      <div class="post-author">
+        <span class="author-name clickable" (click)="onUsernameClick(post.username, $event)">{{ '@' +post.username }}</span>
+        <span class="post-date">{{ post.createdAt | date:'medium' }}</span>
+      </div>
+      
+      <!-- Material Menu for all posts -->
+      <button *ngIf="showMenu" 
+              mat-icon-button 
+              [matMenuTriggerFor]="menu"
+              (click)="$event.stopPropagation()">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <!-- Edit/Delete options for current user's posts -->
+        <ng-container *ngIf="isCurrentUserPost()">
+          <button mat-menu-item (click)="onEditPost()">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="onDeletePost()" class="delete-btn">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        </ng-container>
+        
+        <!-- Report option for other users' posts -->
+        <ng-container *ngIf="!isCurrentUserPost()">
+          <button mat-menu-item (click)="onReportPost()">
+            <mat-icon>flag</mat-icon>
+            <span>Report</span>
+          </button>
+        </ng-container>
+      </mat-menu>
+    </div>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <h3>{{ post.title }}</h3>
+    <p>{{ post.description }}</p>
+    
+    <div *ngIf="post.mediaUrl" class="post-media">
+      <img *ngIf="isImage(post.mediaUrl)" [src]="'http://localhost:8080' + post.mediaUrl" [alt]="post.title">
+      <video *ngIf="isVideo(post.mediaUrl)" controls>
+        <source [src]="'http://localhost:8080' + post.mediaUrl">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button mat-button 
+            [class.liked]="post.isLiked"
+            (click)="onLikeToggle($event)">
+      <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <span>{{ post.likeCount }}</span>
+    </button>
+    <button mat-button (click)="onCommentsToggle($event)">
+      <mat-icon>comment</mat-icon>
+      <span>{{ post.commentCount }}</span>
+    </button>
+  </mat-card-actions>
+
+  <!-- Comments Section -->
+  <div *ngIf="post.showComments" class="comments-section" (click)="$event.stopPropagation()">
+    <div class="comment-input">
+      <input 
+        type="text" 
+        [(ngModel)]="post.newComment" 
+        placeholder="Write a comment..."
+        (keyup.enter)="onAddComment()">
+      <button mat-icon-button color="primary" (click)="onAddComment()">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+
+    <div *ngIf="post.loadingComments" class="loading-comments">
+      <mat-spinner diameter="30"></mat-spinner>
+    </div>
+
+    <div *ngIf="!post.loadingComments && post.comments && post.comments.length > 0" class="comments-list">
+      <div *ngFor="let comment of post.comments" class="comment-item">
+        <div class="comment-header">
+          <span class="comment-username clickable" (click)="onUsernameClick(comment.username, $event)">{{ comment.username }}</span>
+          <span class="comment-date">{{ comment.createdAt | date:'short' }}</span>
+          <button *ngIf="isCurrentUserComment(comment)" 
+                  mat-icon-button 
+                  class="delete-comment-btn"
+                  (click)="onDeleteComment(comment)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <p class="comment-content">{{ comment.content }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="!post.loadingComments && post.comments && post.comments.length === 0" class="no-comments">
+      <p>No comments yet. Be the first to comment!</p>
+    </div>
+  </div>
+</mat-card>

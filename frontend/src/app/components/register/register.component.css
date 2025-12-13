@@ -5,13 +5,12 @@
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background-color: #000;
   padding: 20px;
 }
 
 .register-page {
   display: flex;
-  background: #121212;
+  background: #000000;
   border-radius: 16px;
   box-shadow: 0 0 50px rgba(255, 0, 0, 0.3);
   overflow: hidden;
@@ -38,14 +37,14 @@
   border: 3px solid #7b0000;
   border-radius: 50%;
   position: absolute;
-  top: 140px;
+  top: 200px;
   overflow: hidden;
   box-shadow: 0 0 20px #7b0000;
   transition: all 0.3s ease;
 }
 
-#eye-left { left: 80px; }
-#eye-right { right: 80px; }
+#eye-left { left: 90px; }
+#eye-right { right: 90px; }
 
 .pupil {
   width: 30px;
@@ -73,7 +72,7 @@
 /* Mouth */
 .mouth {
   position: absolute;
-  bottom: 230px;
+  bottom: 240px;
   width: 140px;
   height: 20px;
   background: #7b0000;

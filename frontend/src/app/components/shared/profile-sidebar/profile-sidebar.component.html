@@ -1,0 +1,70 @@
+<aside class="profile-sidebar">
+  <!-- Back Button (only on user profile pages) -->
+  <button 
+    *ngIf="showBackButton" 
+    mat-icon-button 
+    class="back-btn" 
+    (click)="onBackClick()" 
+    matTooltip="Back to Dashboard">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+
+  <div class="user-avatar">
+    <mat-icon>account_circle</mat-icon>
+  </div>
+
+  <div class="user-info">
+    <div *ngIf="isCurrentUser" class="current-user-badge">
+      <mat-icon>verified</mat-icon>
+      <span>{{ username }}</span>
+    </div>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <mat-icon>article</mat-icon>
+      <div class="stat-content">
+        <div class="stat-value">{{ postCount }} <span class="stat-label-inline">Posts</span></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <mat-icon>people</mat-icon>
+      <div class="stat-content">
+        <div class="stat-value">{{ subscriberCount }} <span class="stat-label-inline">Followers</span></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <mat-icon>person_add</mat-icon>
+      <div class="stat-content">
+        <div class="stat-value">{{ subscriptionCount }} <span class="stat-label-inline">Following</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions Section -->
+  <div class="action-section">
+    <!-- View My Profile Button (only on dashboard) -->
+    <button 
+      *ngIf="showViewProfileButton" 
+      mat-raised-button 
+      color="warn" 
+      class="action-btn" 
+      (click)="onViewProfileClick()">
+      <mat-icon>account_box</mat-icon>
+      View My Profile
+    </button>
+
+    <!-- Follow/Unfollow Button (only on other users' profiles) -->
+    <button 
+      *ngIf="!isCurrentUser && !showViewProfileButton"
+      mat-raised-button 
+      color="warn" 
+      class="subscribe-btn"
+      [disabled]="loadingSubscription"
+      (click)="onSubscriptionToggle()">
+      <mat-spinner *ngIf="loadingSubscription" diameter="20"></mat-spinner>
+      <mat-icon *ngIf="!loadingSubscription">{{ isSubscribed ? 'person_remove' : 'person_add' }}</mat-icon>
+      <span *ngIf="!loadingSubscription">{{ isSubscribed ? 'Unfollow' : 'Follow' }}</span>
+    </button>
+  </div>
+</aside>

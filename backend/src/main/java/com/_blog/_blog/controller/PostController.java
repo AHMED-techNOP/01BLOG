@@ -1,8 +1,12 @@
 package com._blog._blog.controller;
 import com._blog._blog.entity.Post;
 import com._blog._blog.entity.User;
+import com._blog._blog.entity.Like;
+import com._blog._blog.entity.Comment;
 import com._blog._blog.repository.PostRepository;
 import com._blog._blog.repository.UserRepository;
+import com._blog._blog.repository.LikeRepository;
+import com._blog._blog.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,6 +34,12 @@ public class PostController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     private final String UPLOAD_DIR = "uploads/";
 
@@ -74,16 +84,8 @@ public class PostController {
             Post post = new Post(user, title, description, mediaUrl);
             Post savedPost = postRepository.save(post);
 
-            // Return DTO with username
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", savedPost.getId());
-            response.put("title", savedPost.getTitle());
-            response.put("description", savedPost.getDescription());
-            response.put("mediaUrl", savedPost.getMediaUrl() != null ? savedPost.getMediaUrl() : "");
-            response.put("createdAt", savedPost.getCreatedAt());
-            response.put("username", user.getUsername());
-            
-            return ResponseEntity.ok(response);
+            // Return DTO with username and like info
+            return ResponseEntity.ok(postToDTO(savedPost, user));
 
 
         } catch (IOException e) {
@@ -95,29 +97,33 @@ public class PostController {
 
     @GetMapping
     @Transactional
-    public ResponseEntity<?> getAllPosts() {
+    public ResponseEntity<?> getAllPosts(@AuthenticationPrincipal User user) {
         List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
         
-        // Convert to DTOs to include username
-        List<Map<String, Object>> postDTOs = posts.stream().map(post -> {
-            Map<String, Object> dto = new HashMap<>();
-            dto.put("id", post.getId());
-            dto.put("title", post.getTitle());
-            dto.put("description", post.getDescription());
-            dto.put("mediaUrl", post.getMediaUrl() != null ? post.getMediaUrl() : "");
-            dto.put("createdAt", post.getCreatedAt());
-            dto.put("username", post.getUser().getUsername());
-            return dto;
-        }).collect(java.util.stream.Collectors.toList());
+        // Convert to DTOs to include username and like info
+        List<Map<String, Object>> postDTOs = posts.stream()
+                .map(post -> postToDTO(post, user))
+                .collect(java.util.stream.Collectors.toList());
         
         return ResponseEntity.ok(postDTOs);
     }
 
     @GetMapping("/user/{username}")
-    public ResponseEntity<?> getUserPosts(@PathVariable String username) {
+    @Transactional
+    public ResponseEntity<?> getUserPosts(
+            @PathVariable String username,
+            @AuthenticationPrincipal User currentUser) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return ResponseEntity.ok(postRepository.findByUserOrderByCreatedAtDesc(user));
+        
+        List<Post> posts = postRepository.findByUserOrderByCreatedAtDesc(user);
+        
+        // Convert to DTOs to include username and like info
+        List<Map<String, Object>> postDTOs = posts.stream()
+                .map(post -> postToDTO(post, currentUser))
+                .collect(java.util.stream.Collectors.toList());
+        
+        return ResponseEntity.ok(postDTOs);
     }
 
     @DeleteMapping("/{postId}")
@@ -170,19 +176,11 @@ public class PostController {
                 return ResponseEntity.status(401).body(Map.of("message", "User not authenticated"));
             }
             
-            System.out.println("Update request from user: " + user.getUsername());
-            System.out.println("Found user with ID: " + user.getId());
-
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new RuntimeException("Post not found"));
             
-            System.out.println("Found post with ID: " + post.getId());
-            System.out.println("Post owner ID: " + post.getUser().getId());
-            System.out.println("Current user ID: " + user.getId());
-
             // Check if user owns the post
             if (!post.getUser().getId().equals(user.getId())) {
-                System.out.println("Permission denied: User " + user.getId() + " tried to edit post owned by " + post.getUser().getId());
                 return ResponseEntity.status(403).body(Map.of("message", "You don't have permission to edit this post"));
             }
 
@@ -231,21 +229,196 @@ public class PostController {
 
             Post updatedPost = postRepository.save(post);
             
-            // Return DTO with username
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", updatedPost.getId());
-            response.put("title", updatedPost.getTitle());
-            response.put("description", updatedPost.getDescription());
-            response.put("mediaUrl", updatedPost.getMediaUrl() != null ? updatedPost.getMediaUrl() : "");
-            response.put("createdAt", updatedPost.getCreatedAt());
-            response.put("username", user.getUsername());
-            
-            return ResponseEntity.ok(response);
+            // Return DTO with username and like info
+            return ResponseEntity.ok(postToDTO(updatedPost, user));
 
         } catch (IOException e) {
             return ResponseEntity.status(500).body(Map.of("message", "Failed to upload media file"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("message", "Failed to update post: " + e.getMessage()));
+        }
+    }
+
+    // Helper method to convert Post to DTO with like information
+    private Map<String, Object> postToDTO(Post post, User currentUser) {
+        Map<String, Object> dto = new HashMap<>();
+        dto.put("id", post.getId());
+        dto.put("title", post.getTitle());
+        dto.put("description", post.getDescription());
+        dto.put("mediaUrl", post.getMediaUrl() != null ? post.getMediaUrl() : "");
+        dto.put("createdAt", post.getCreatedAt());
+        dto.put("username", post.getUser().getUsername());
+        dto.put("likeCount", likeRepository.countByPost(post));
+        dto.put("isLiked", currentUser != null && likeRepository.existsByPostAndUser(post, currentUser));
+        dto.put("commentCount", commentRepository.countByPost(post));
+        return dto;
+    }
+
+    // Like a post
+    @PostMapping("/{postId}/like")
+    @Transactional
+    public ResponseEntity<?> likePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal User user) {
+        try {
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("message", "User not authenticated"));
+            }
+
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            // Check if user has already liked the post
+            if (likeRepository.existsByPostAndUser(post, user)) {
+                return ResponseEntity.status(400).body(Map.of("message", "Post already liked"));
+            }
+
+            // Create and save like
+            Like like = new Like(post, user);
+            likeRepository.save(like);
+
+            // Return updated like count and status
+            Map<String, Object> response = new HashMap<>();
+            response.put("likeCount", likeRepository.countByPost(post));
+            response.put("isLiked", true);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Failed to like post: " + e.getMessage()));
+        }
+    }
+
+    // Unlike a post
+    @DeleteMapping("/{postId}/like")
+    @Transactional
+    public ResponseEntity<?> unlikePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal User user) {
+        try {
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("message", "User not authenticated"));
+            }
+
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            // Check if user has liked the post
+            if (!likeRepository.existsByPostAndUser(post, user)) {
+                return ResponseEntity.status(400).body(Map.of("message", "Post not liked yet"));
+            }
+
+            // Delete the like
+            likeRepository.deleteByPostAndUser(post, user);
+
+            // Return updated like count and status
+            Map<String, Object> response = new HashMap<>();
+            response.put("likeCount", likeRepository.countByPost(post));
+            response.put("isLiked", false);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Failed to unlike post: " + e.getMessage()));
+        }
+    }
+
+    // Get comments for a post
+    @GetMapping("/{postId}/comments")
+    @Transactional
+    public ResponseEntity<?> getComments(@PathVariable Long postId) {
+        try {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            List<Comment> comments = commentRepository.findByPostOrderByCreatedAtDesc(post);
+
+            // Convert to DTOs
+            List<Map<String, Object>> commentDTOs = comments.stream().map(comment -> {
+                Map<String, Object> dto = new HashMap<>();
+                dto.put("id", comment.getId());
+                dto.put("content", comment.getContent());
+                dto.put("username", comment.getUser().getUsername());
+                dto.put("createdAt", comment.getCreatedAt());
+                return dto;
+            }).collect(java.util.stream.Collectors.toList());
+
+            return ResponseEntity.ok(commentDTOs);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Failed to get comments: " + e.getMessage()));
+        }
+    }
+
+    // Add a comment to a post
+    @PostMapping("/{postId}/comments")
+    @Transactional
+    public ResponseEntity<?> addComment(
+            @PathVariable Long postId,
+            @RequestBody Map<String, String> request,
+            @AuthenticationPrincipal User user) {
+        try {
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("message", "User not authenticated"));
+            }
+
+            String content = request.get("content");
+            if (content == null || content.trim().isEmpty()) {
+                return ResponseEntity.status(400).body(Map.of("message", "Comment content cannot be empty"));
+            }
+
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            // Create and save comment
+            Comment comment = new Comment(post, user, content.trim());
+            Comment savedComment = commentRepository.save(comment);
+
+            // Return comment DTO
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", savedComment.getId());
+            response.put("content", savedComment.getContent());
+            response.put("username", user.getUsername());
+            response.put("createdAt", savedComment.getCreatedAt());
+            response.put("commentCount", commentRepository.countByPost(post));
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Failed to add comment: " + e.getMessage()));
+        }
+    }
+
+    // Delete a comment
+    @DeleteMapping("/{postId}/comments/{commentId}")
+    @Transactional
+    public ResponseEntity<?> deleteComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal User user) {
+        try {
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("message", "User not authenticated"));
+            }
+
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+            // Check if user owns the comment or the post
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            if (!comment.getUser().getId().equals(user.getId()) && !post.getUser().getId().equals(user.getId())) {
+                return ResponseEntity.status(403).body(Map.of("message", "You don't have permission to delete this comment"));
+            }
+
+            commentRepository.delete(comment);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Comment deleted successfully");
+            response.put("commentCount", commentRepository.countByPost(post));
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Failed to delete comment: " + e.getMessage()));
         }
     }
 }
