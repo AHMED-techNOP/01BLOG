@@ -15,8 +15,6 @@ export class AuthService {
     const storedToken = localStorage.getItem('jwt_token');
     if (storedToken) {
       try {
-        // Extract user data from stored JWT token (for display purposes only)
-        // Backend will validate the token when making API calls
         const userData = this.extractUserFromToken(storedToken);
         this.currentUserSubject.next(userData);
       } catch (error) {

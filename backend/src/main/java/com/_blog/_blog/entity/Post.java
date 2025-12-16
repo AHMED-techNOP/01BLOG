@@ -35,6 +35,9 @@ public class Post {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(name = "is_hidden", nullable = false)
+    private boolean hidden = false;
+    
     // One-to-many relationships
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

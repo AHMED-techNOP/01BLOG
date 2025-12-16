@@ -98,7 +98,8 @@ public class PostController {
     @GetMapping
     @Transactional
     public ResponseEntity<?> getAllPosts(@AuthenticationPrincipal User user) {
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
+        // Get all posts excluding hidden ones
+        List<Post> posts = postRepository.findByHiddenFalseOrderByCreatedAtDesc();
         
         // Convert to DTOs to include username and like info
         List<Map<String, Object>> postDTOs = posts.stream()

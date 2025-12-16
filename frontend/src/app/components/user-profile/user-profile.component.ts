@@ -6,8 +6,10 @@ import { Subscription } from 'rxjs';
 import { ApiService, Post, Comment } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { PostManagementService } from '../../services/post-management.service';
+import { NewPostService } from '../../services/new-post.service';
 import { PostCardComponent } from '../shared/post-card/post-card.component';
 import { ProfileSidebarComponent } from '../shared/profile-sidebar/profile-sidebar.component';
+import { CreatePostComponent } from '../shared/create-post/create-post.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,6 +23,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     FormsModule,
     PostCardComponent,
     ProfileSidebarComponent,
+    CreatePostComponent,
     MatButtonModule,
     MatCardModule,
     MatIconModule,
@@ -43,6 +46,10 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   subscriptionCount: number = 0;
   loadingSubscription: boolean = false;
 
+  // Edit modal state
+  editingPost: Post | null = null;
+  showCreatePost: boolean = false;
+
   private newPostSubscription?: Subscription;
 
   constructor(
@@ -50,7 +57,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     private router: Router,
     private apiService: ApiService,
     private authService: AuthService,
-    private postManagementService: PostManagementService
+    private postManagementService: PostManagementService,
+    private newPostService: NewPostService
   ) {
     this.currentUser = this.authService.getUserInfo();
   }
@@ -68,7 +76,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     });
 
     // Subscribe to new posts (from header) - only show on current user's profile
-    this.newPostSubscription = this.postManagementService.newPost$.subscribe((newPost: Post) => {
+    this.newPostSubscription = this.newPostService.newPost$.subscribe((newPost: Post) => {
       // Only add to list if viewing current user's profile
       if (this.isCurrentUser()) {
         this.posts.unshift(newPost);
@@ -128,6 +136,41 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   onCommentDeleted(event: { post: Post, comment: Comment }): void {
     this.postManagementService.deleteComment(event.post, event.comment);
+  }
+
+  onPostEdited(post: Post): void {
+    // Open the edit modal
+    this.editingPost = post;
+    this.showCreatePost = true;
+  }
+
+  onPostDeleted(postId: number): void {
+    // Delete the post directly
+    this.apiService.deletePost(postId).subscribe({
+      next: () => {
+        this.posts = this.posts.filter(p => p.id !== postId);
+      },
+      error: (error) => {
+        console.error('Failed to delete post:', error);
+        alert('Failed to delete post. Please try again.');
+      }
+    });
+  }
+
+  onPostUpdated(updatedPost: Post): void {
+    // Update the post in the local array
+    const index = this.posts.findIndex(p => p.id === updatedPost.id);
+    if (index !== -1) {
+      this.posts[index] = updatedPost;
+      this.posts = [...this.posts]; // Trigger change detection
+    }
+    this.editingPost = null;
+    this.showCreatePost = false;
+  }
+
+  onEditCancel(): void {
+    this.editingPost = null;
+    this.showCreatePost = false;
   }
 
   // Subscription methods

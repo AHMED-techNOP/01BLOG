@@ -34,21 +34,10 @@
             (commentsToggled)="toggleComments($event)"
             (commentAdded)="addComment($event)"
             (commentDeleted)="onCommentDeleted($event)"
-            (postEdited)="editPost($event)"
-            (postDeleted)="deletePost($event)"
             (usernameClicked)="viewUserProfile($event)">
           </app-post-card>
         </div>
       </div>
     </main>
   </div>
-
-  <!-- Create/Edit Post Modal -->
-  <app-create-post 
-    *ngIf="showCreatePost" 
-    [editingPost]="editingPost"
-    (cancel)="closeCreatePost()"
-    (postCreated)="onPostCreated($event)"
-    (postUpdated)="onPostUpdated($event)">
-  </app-create-post>
 </div>

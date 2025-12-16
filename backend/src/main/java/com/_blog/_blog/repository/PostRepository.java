@@ -11,10 +11,13 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
+    // Find user's posts (including hidden ones for the owner)
     List<Post> findByUserOrderByCreatedAtDesc(User user);
-    List<Post> findAllByOrderByCreatedAtDesc();
     
-    // Find posts by users that the current user is subscribed to
-    @Query("SELECT p FROM Post p WHERE p.user.id IN :userIds ORDER BY p.createdAt DESC")
+    // Find all posts excluding hidden ones
+    List<Post> findByHiddenFalseOrderByCreatedAtDesc();
+    
+    // Find posts by users that the current user is subscribed to (excluding hidden)
+    @Query("SELECT p FROM Post p WHERE p.user.id IN :userIds AND p.hidden = false ORDER BY p.createdAt DESC")
     List<Post> findByUserIdInOrderByCreatedAtDesc(@Param("userIds") List<Long> userIds);
 }

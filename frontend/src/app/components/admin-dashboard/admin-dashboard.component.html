@@ -1,0 +1,332 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <button mat-icon-button (click)="goBack()" matTooltip="Back to Dashboard">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>
+      <mat-icon>admin_panel_settings</mat-icon>
+      Admin Dashboard
+    </h1>
+  </div>
+
+  <mat-tab-group [(selectedIndex)]="selectedTab" class="admin-tabs">
+    <!-- Users Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">people</mat-icon>
+        Users
+        <span class="tab-badge" [matBadge]="users.length" matBadgeSize="small" matBadgeColor="primary"></span>
+      </ng-template>
+      
+      <div class="tab-content">
+        <div *ngIf="loading" class="loading">
+          <mat-spinner color="warn"></mat-spinner>
+        </div>
+
+        <div *ngIf="!loading" class="table-container">
+          <table mat-table [dataSource]="users" class="admin-table">
+            <!-- ID Column -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let user">{{user.id}}</td>
+            </ng-container>
+
+            <!-- Username Column -->
+            <ng-container matColumnDef="username">
+              <th mat-header-cell *matHeaderCellDef>Username</th>
+              <td mat-cell *matCellDef="let user">
+                <strong>{{user.username}}</strong>
+                <mat-chip *ngIf="user.isBanned" class="banned-chip">BANNED</mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Email Column -->
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef>Email</th>
+              <td mat-cell *matCellDef="let user">{{user.email}}</td>
+            </ng-container>
+
+            <!-- Role Column -->
+            <ng-container matColumnDef="role">
+              <th mat-header-cell *matHeaderCellDef>Role</th>
+              <td mat-cell *matCellDef="let user">
+                <mat-chip [class.admin-chip]="user.role === 'ADMIN'">
+                  {{user.role}}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Post Count Column -->
+            <ng-container matColumnDef="postCount">
+              <th mat-header-cell *matHeaderCellDef>Posts</th>
+              <td mat-cell *matCellDef="let user">{{user.postCount || 0}}</td>
+            </ng-container>
+
+            <!-- Follower Count Column -->
+            <ng-container matColumnDef="followerCount">
+              <th mat-header-cell *matHeaderCellDef>Followers</th>
+              <td mat-cell *matCellDef="let user">{{user.followerCount || 0}}</td>
+            </ng-container>
+
+            <!-- Created At Column -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Joined</th>
+              <td mat-cell *matCellDef="let user">{{formatDate(user.createdAt)}}</td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let user">
+                <div class="action-buttons">
+                  <button 
+                    *ngIf="!user.isBanned && user.role !== 'ADMIN'" 
+                    mat-icon-button 
+                    color="warn"
+                    (click)="banUser(user)"
+                    matTooltip="Ban User">
+                    <mat-icon>block</mat-icon>
+                  </button>
+                  <button 
+                    *ngIf="user.isBanned" 
+                    mat-icon-button 
+                    color="primary"
+                    (click)="unbanUser(user)"
+                    matTooltip="Unban User">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                  <button 
+                    *ngIf="user.role !== 'ADMIN'" 
+                    mat-icon-button 
+                    color="warn"
+                    (click)="deleteUser(user)"
+                    matTooltip="Delete User">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: userColumns;"></tr>
+          </table>
+
+          <div *ngIf="users.length === 0" class="no-data">
+            <mat-icon>people_outline</mat-icon>
+            <p>No users found</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Posts Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">article</mat-icon>
+        Posts
+        <span class="tab-badge" [matBadge]="posts.length" matBadgeSize="small" matBadgeColor="primary"></span>
+      </ng-template>
+      
+      <div class="tab-content">
+        <div *ngIf="loading" class="loading">
+          <mat-spinner color="warn"></mat-spinner>
+        </div>
+
+        <div *ngIf="!loading" class="table-container">
+          <table mat-table [dataSource]="posts" class="admin-table">
+            <!-- ID Column -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let post">{{post.id}}</td>
+            </ng-container>
+
+            <!-- Title Column -->
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef>Title</th>
+              <td mat-cell *matCellDef="let post">
+                <strong>{{post.title}}</strong>
+                <mat-chip *ngIf="post.isHidden" class="hidden-chip">HIDDEN</mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Username Column -->
+            <ng-container matColumnDef="username">
+              <th mat-header-cell *matHeaderCellDef>Author</th>
+              <td mat-cell *matCellDef="let post">{{ '@' + post.username }}</td>
+            </ng-container>
+
+            <!-- Like Count Column -->
+            <ng-container matColumnDef="likeCount">
+              <th mat-header-cell *matHeaderCellDef>Likes</th>
+              <td mat-cell *matCellDef="let post">{{post.likeCount || 0}}</td>
+            </ng-container>
+
+            <!-- Comment Count Column -->
+            <ng-container matColumnDef="commentCount">
+              <th mat-header-cell *matHeaderCellDef>Comments</th>
+              <td mat-cell *matCellDef="let post">{{post.commentCount || 0}}</td>
+            </ng-container>
+
+            <!-- Created At Column -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Posted</th>
+              <td mat-cell *matCellDef="let post">{{formatDate(post.createdAt)}}</td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let post">
+                <div class="action-buttons">
+                  <button 
+                    *ngIf="!post.isHidden" 
+                    mat-icon-button 
+                    color="warn"
+                    (click)="hidePost(post)"
+                    matTooltip="Hide Post">
+                    <mat-icon>visibility_off</mat-icon>
+                  </button>
+                  <button 
+                    *ngIf="post.isHidden" 
+                    mat-icon-button 
+                    color="primary"
+                    (click)="unhidePost(post)"
+                    matTooltip="Unhide Post">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button 
+                    mat-icon-button 
+                    color="warn"
+                    (click)="deletePost(post)"
+                    matTooltip="Delete Post">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="postColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: postColumns;"></tr>
+          </table>
+
+          <div *ngIf="posts.length === 0" class="no-data">
+            <mat-icon>article</mat-icon>
+            <p>No posts found</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Reports Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">flag</mat-icon>
+        Reports
+        <span class="tab-badge" [matBadge]="reports.length" matBadgeSize="small" matBadgeColor="warn"></span>
+      </ng-template>
+      
+      <div class="tab-content">
+        <div *ngIf="loading" class="loading">
+          <mat-spinner color="warn"></mat-spinner>
+        </div>
+
+        <div *ngIf="!loading" class="table-container">
+          <table mat-table [dataSource]="reports" class="admin-table">
+            <!-- ID Column -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let report">{{report.id}}</td>
+            </ng-container>
+
+            <!-- Reporter Column -->
+            <ng-container matColumnDef="reporter">
+              <th mat-header-cell *matHeaderCellDef>Reporter</th>
+              <td mat-cell *matCellDef="let report">{{ '@' + report.reporterUsername }}</td>
+            </ng-container>
+
+            <!-- Reported Column -->
+            <ng-container matColumnDef="reported">
+              <th mat-header-cell *matHeaderCellDef>Reported</th>
+              <td mat-cell *matCellDef="let report">{{getReportedEntity(report)}}</td>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let report">
+                <mat-chip [class.post-report-chip]="report.postId">
+                  {{getReportType(report)}}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Reason Column -->
+            <ng-container matColumnDef="reason">
+              <th mat-header-cell *matHeaderCellDef>Reason</th>
+              <td mat-cell *matCellDef="let report">{{report.reason}}</td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let report">
+                <mat-chip 
+                  [class.pending-chip]="report.status === 'PENDING'"
+                  [class.reviewed-chip]="report.status === 'REVIEWED'"
+                  [class.resolved-chip]="report.status === 'RESOLVED'">
+                  {{report.status}}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Timestamp Column -->
+            <ng-container matColumnDef="timestamp">
+              <th mat-header-cell *matHeaderCellDef>Reported</th>
+              <td mat-cell *matCellDef="let report">{{formatDate(report.timestamp)}}</td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let report">
+                <div class="action-buttons">
+                  <button 
+                    *ngIf="report.status !== 'REVIEWED'" 
+                    mat-icon-button 
+                    color="primary"
+                    (click)="updateReportStatus(report, 'REVIEWED')"
+                    matTooltip="Mark as Reviewed">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button 
+                    *ngIf="report.status !== 'RESOLVED'" 
+                    mat-icon-button 
+                    color="accent"
+                    (click)="updateReportStatus(report, 'RESOLVED')"
+                    matTooltip="Mark as Resolved">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                  <button 
+                    mat-icon-button 
+                    color="warn"
+                    (click)="deleteReport(report)"
+                    matTooltip="Delete Report">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="reportColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: reportColumns;"></tr>
+          </table>
+
+          <div *ngIf="reports.length === 0" class="no-data">
+            <mat-icon>flag</mat-icon>
+            <p>No reports found</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

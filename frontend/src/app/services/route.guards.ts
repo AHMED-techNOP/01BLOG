@@ -2,12 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { AuthService } from './auth.service';
 
-/**
- * AuthGuard - Protects routes that require authentication
- * Simply checks if user has a valid token locally
- * Actual token validation happens via Spring Security filters on API calls
- * If token is invalid, API returns 401 and HTTP interceptor handles logout
- */
+
 
 @Injectable({
   providedIn: 'root'

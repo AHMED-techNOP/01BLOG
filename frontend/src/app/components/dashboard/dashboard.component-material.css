@@ -1,7 +1,7 @@
 /* Dashboard Container - Dark Theme with Material */
 .dashboard-container {
   min-height: 100vh;
-  padding: 90px 20px 20px 20px;  /* Space for fixed header */
+  padding: 90px 20px 20px 20px;  
   background: transparent;
 }
 

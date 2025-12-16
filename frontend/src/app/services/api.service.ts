@@ -14,6 +14,7 @@ export interface LoginRequest {
 }
 
 export interface AuthResponse {
+  id?: number;
   token: string;
   type: string;
   username: string;
@@ -24,7 +25,7 @@ export interface AuthResponse {
 export interface Post {
   id: number;
   title: string;
-  description: string;  // Changed from 'content' to 'description'
+  description: string;  
   mediaUrl: string;
   createdAt: string;
   username: string;
@@ -46,6 +47,15 @@ export interface Comment {
   createdAt: string;
 }
 
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  subscriberCount?: number;
+  isSubscribed?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -64,6 +74,11 @@ export class ApiService {
 
   getSubscribedUsersposts(): Observable<Post[]> {
     return this.http.get<Post[]>(`${this.baseUrl}/user/me`);
+  }
+
+  // Get all users
+  getAllUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.baseUrl}/user/all`);
   }
 
   // Create a new post
@@ -158,7 +173,7 @@ export class ApiService {
   }
 
   // Report a post
-  reportPost(reportData: { postId: number; reason: string; timestamp: string }): Observable<any> {
+  reportPost(reportData: { postId: number; reason: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/reports`, reportData);
   }
 }

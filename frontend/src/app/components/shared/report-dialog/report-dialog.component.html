@@ -10,6 +10,11 @@
       <p><strong>Author:</strong> {{ '@' + data.postUsername }}</p>
     </div>
 
+    <div *ngIf="errorMessage" class="error-message">
+      <mat-icon>error</mat-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Reason for reporting</mat-label>
       <mat-select [(ngModel)]="reason" required>
@@ -30,10 +35,7 @@
       </textarea>
     </mat-form-field>
 
-    <div class="warning-message">
-      <mat-icon>info</mat-icon>
-      <p>Reports are reviewed by our moderation team. False reports may result in action against your account.</p>
-    </div>
+   
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

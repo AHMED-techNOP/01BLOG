@@ -35,13 +35,26 @@ public class ReportController {
         }
 
         try {
+           
+            // Validate required fields
+            if (!reportData.containsKey("postId")) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Missing postId field"));
+            }
+            
+            if (!reportData.containsKey("reason")) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Missing reason field"));
+            }
+            
             Long postId = Long.valueOf(reportData.get("postId").toString());
             String reason = reportData.get("reason").toString();
+            
             
             // Find the post
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new RuntimeException("Post not found"));
-            
+                        
             // Check if user is trying to report their own post
             if (post.getUser().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest()
@@ -50,9 +63,10 @@ public class ReportController {
             
             // Create and save the report
             Report report = new Report(user, post, reason);
+            report.setReportedUser(post.getUser()); // Set the post's author as the reported user
             report.setStatus("PENDING");
             reportRepository.save(report);
-            
+                        
             return ResponseEntity.ok(Map.of(
                     "message", "Report submitted successfully",
                     "reportId", report.getId(),
@@ -60,6 +74,8 @@ public class ReportController {
             ));
             
         } catch (Exception e) {
+            System.err.println("Error submitting report: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Failed to submit report: " + e.getMessage()));
         }

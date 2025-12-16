@@ -1,0 +1,76 @@
+<div class="user-search-container">
+  <div class="search-header">
+    <h2>
+      <mat-icon>people</mat-icon>
+      Discover Users
+    </h2>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search users by username or email</mat-label>
+      <input 
+        matInput 
+        [(ngModel)]="searchQuery" 
+        (ngModelChange)="onSearch()"
+        placeholder="Type to search...">
+      <mat-icon matPrefix>search</mat-icon>
+      <button 
+        mat-icon-button 
+        matSuffix 
+        *ngIf="searchQuery"
+        (click)="searchQuery=''; onSearch()">
+        <mat-icon>clear</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Users List -->
+  <div *ngIf="!loading" class="users-grid">
+    <mat-card *ngFor="let user of filteredUsers" class="user-card">
+      <mat-card-header>
+        <div mat-card-avatar class="user-avatar">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <mat-card-title>{{ user.username }}</mat-card-title>
+        <mat-card-subtitle>{{ user.email }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="user-stats">
+          <div class="stat">
+            <mat-icon>people</mat-icon>
+            <span>{{ user.subscriberCount || 0 }} subscribers</span>
+          </div>
+          <div class="stat" *ngIf="user.role === 'ADMIN'">
+            <mat-icon color="accent">admin_panel_settings</mat-icon>
+            <span class="admin-badge">Admin</span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button 
+          mat-raised-button 
+          [color]="user.isSubscribed ? 'warn' : 'primary'"
+          (click)="toggleSubscribe(user)">
+          <mat-icon>{{ user.isSubscribed ? 'person_remove' : 'person_add' }}</mat-icon>
+          {{ user.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- No Results -->
+    <div *ngIf="filteredUsers.length === 0" class="no-results">
+      <mat-icon>search_off</mat-icon>
+      <p>No users found</p>
+      <p class="subtitle">Try a different search term</p>
+    </div>
+  </div>
+</div>

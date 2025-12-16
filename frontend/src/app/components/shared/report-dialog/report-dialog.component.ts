@@ -35,6 +35,7 @@ export class ReportDialogComponent {
   reason: string = '';
   customReason: string = '';
   loading: boolean = false;
+  errorMessage: string = '';
 
   reportReasons = [
     'Spam or misleading',
@@ -57,13 +58,16 @@ export class ReportDialogComponent {
   }
 
   onSubmit(): void {
+    // Clear previous error
+    this.errorMessage = '';
+
     if (!this.reason) {
-      alert('Please select a reason for reporting');
+      this.errorMessage = 'Please select a reason for reporting';
       return;
     }
 
     if (this.reason === 'Other' && !this.customReason.trim()) {
-      alert('Please provide a reason for reporting');
+      this.errorMessage = 'Please provide a reason for reporting';
       return;
     }
 
@@ -71,8 +75,7 @@ export class ReportDialogComponent {
 
     const reportData = {
       postId: this.data.postId,
-      reason: this.reason === 'Other' ? this.customReason.trim() : this.reason,
-      timestamp: new Date().toISOString()
+      reason: this.reason === 'Other' ? this.customReason.trim() : this.reason
     };
 
     this.apiService.reportPost(reportData).subscribe({
@@ -80,12 +83,11 @@ export class ReportDialogComponent {
         console.log('Report submitted successfully:', response);
         this.loading = false;
         this.dialogRef.close(reportData);
-        alert('Report submitted successfully. Thank you for helping keep our community safe.');
       },
       error: (error) => {
         console.error('Failed to submit report:', error);
         this.loading = false;
-        alert('Failed to submit report. Please try again.');
+        this.errorMessage = 'Failed to submit report. Please try again.';
       }
     });
   }

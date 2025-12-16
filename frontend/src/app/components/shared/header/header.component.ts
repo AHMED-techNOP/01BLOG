@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
-import { PostManagementService } from '../../../services/post-management.service';
+import { NewPostService } from '../../../services/new-post.service';
 import { CreatePostComponent } from '../create-post/create-post.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,7 +32,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private postManagementService: PostManagementService
+    private newPostService: NewPostService
   ) {}
 
   ngOnInit(): void {
@@ -72,6 +72,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['/dashboard']);
   }
 
+  goToAdmin(): void {
+    this.router.navigate(['/admin']);
+  }
+
+  goToUserSearch(): void {
+    this.router.navigate(['/users']);
+  }
+
   createPost(): void {
     this.showCreatePost = true;
   }
@@ -83,12 +91,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   onPostCreated(post: any): void {
     this.showCreatePost = false;
-    // Notify dashboard about the new post
-    this.postManagementService.addNewPost(post);
-    // Navigate to dashboard to see the new post
-    if (this.router.url !== '/dashboard') {
-      this.router.navigate(['/dashboard']);
-    }
+    // Notify user-profile about the new post
+    this.newPostService.addNewPost(post);
   }
 
   onPostUpdated(post: any): void {

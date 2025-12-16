@@ -6,6 +6,7 @@ import com._blog._blog.repository.PostRepository;
 import com._blog._blog.repository.LikeRepository;
 import com._blog._blog.repository.CommentRepository;
 import com._blog._blog.repository.SubscriptionRepository;
+import com._blog._blog.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,6 +34,9 @@ public class UserController {
     @Autowired
     private SubscriptionRepository subscriptionRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     /**
      * Get posts for the dashboard (only from subscribed users)
      */
@@ -49,8 +53,8 @@ public class UserController {
         // Fetch posts only from subscribed users, or all posts if not subscribed to anyone
         List<Post> posts;
         if (subscribedUserIds.isEmpty()) {
-            // If user is not subscribed to anyone, show all posts
-            posts = postRepository.findAllByOrderByCreatedAtDesc();
+            // If user is not subscribed to anyone, show all posts (excluding hidden ones)
+            posts = postRepository.findByHiddenFalseOrderByCreatedAtDesc();
         } else {
             posts = postRepository.findByUserIdInOrderByCreatedAtDesc(subscribedUserIds);
         }
@@ -71,5 +75,37 @@ public class UserController {
         }).collect(Collectors.toList());
         
         return ResponseEntity.ok(postDTOs);
+    }
+
+    /**
+     * Get all users with subscription info
+     */
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllUsers(@AuthenticationPrincipal User currentUser) {
+        try {
+            List<User> users = userRepository.findAll();
+            
+            // Get current user's subscriptions
+            List<Long> subscribedUserIds = subscriptionRepository.findSubscribedToUserIds(currentUser.getId());
+            
+            // Convert to DTO with subscription info
+            List<Map<String, Object>> userDTOs = users.stream()
+                .filter(user -> !user.getId().equals(currentUser.getId())) // Exclude current user
+                .map(user -> {
+                    Map<String, Object> dto = new HashMap<>();
+                    dto.put("id", user.getId());
+                    dto.put("username", user.getUsername());
+                    dto.put("email", user.getEmail());
+                    dto.put("role", user.getRole());
+                    dto.put("subscriberCount", subscriptionRepository.countBySubscribedTo(user));
+                    dto.put("isSubscribed", subscribedUserIds.contains(user.getId()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+            return ResponseEntity.ok(userDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Error fetching users: " + e.getMessage()));
+        }
     }
 }

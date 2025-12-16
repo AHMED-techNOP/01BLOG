@@ -40,6 +40,9 @@ public class User implements UserDetails {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(name = "is_banned", nullable = false)
+    private boolean banned = false;
+    
     // One-to-many relationships
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -86,7 +89,7 @@ public class User implements UserDetails {
     
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !banned; // Account is locked if user is banned
     }
     
     @Override
@@ -96,7 +99,7 @@ public class User implements UserDetails {
     
     @Override
     public boolean isEnabled() {
-        return true;
+        return !banned; // User is disabled if banned
     }
 }
 
