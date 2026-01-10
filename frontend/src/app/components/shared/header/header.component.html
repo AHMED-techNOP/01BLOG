@@ -1,4 +1,4 @@
-<header class="app-header" *ngIf="isAuthenticated">
+<header class="app-header" *ngIf="isAuthenticated && !isErrorPage">
 
    <button mat-button (click)="viewMyProfile()">
       <mat-icon>person</mat-icon>
@@ -13,6 +13,15 @@
       <mat-icon>search</mat-icon>
       Search Users
     </button>
+    
+    <!-- Notifications Button -->
+    <button mat-button [matMenuTriggerFor]="notificationMenu" (menuOpened)="loadNotifications()">
+      <mat-icon [matBadge]="unreadCount" [matBadgeHidden]="unreadCount === 0" matBadgeColor="warn" matBadgeSize="small">
+        notifications
+      </mat-icon>
+      Notifications
+    </button>
+    
     <button mat-button (click)="createPost()">
       <mat-icon>add</mat-icon>
       Create Post
@@ -27,6 +36,36 @@
     </button>
   </div>
 </header>
+
+<!-- Notification Menu -->
+<mat-menu #notificationMenu="matMenu" class="notification-menu">
+  <div class="notification-header" (click)="$event.stopPropagation()">
+    <h3>Notifications</h3>
+    <button mat-button color="primary" (click)="markAllAsRead()" *ngIf="unreadCount > 0">
+      Mark all as read
+    </button>
+  </div>
+  
+  <div class="notification-list" *ngIf="notifications.length > 0">
+    <button mat-menu-item *ngFor="let notification of notifications" 
+            (click)="markAsRead(notification)"
+            [class.unread]="!notification.read">
+      <div class="notification-item">
+        <mat-icon class="notification-icon">{{ notification.type === 'NEW_POST' ? 'article' : 'notifications' }}</mat-icon>
+        <div class="notification-content">
+          <p class="notification-message">{{ notification.message }}</p>
+          <small class="notification-time">{{ notification.createdAt | date:'short' }}</small>
+        </div>
+        <mat-icon *ngIf="!notification.read" class="unread-indicator">fiber_manual_record</mat-icon>
+      </div>
+    </button>
+  </div>
+  
+  <div class="no-notifications" *ngIf="notifications.length === 0" (click)="$event.stopPropagation()">
+    <mat-icon>notifications_none</mat-icon>
+    <p>No new notifications</p>
+  </div>
+</mat-menu>
 
 <!-- Create/Edit Post Modal -->
 <app-create-post 

@@ -41,6 +41,15 @@ public class PostController {
     @Autowired
     private CommentRepository commentRepository;
 
+    @Autowired
+    private com._blog._blog.repository.NotificationRepository notificationRepository;
+
+    @Autowired
+    private com._blog._blog.repository.SubscriptionRepository subscriptionRepository;
+
+    @Autowired
+    private com._blog._blog.repository.ReportRepository reportRepository;
+
     private final String UPLOAD_DIR = "uploads/";
 
     @PostMapping
@@ -84,6 +93,21 @@ public class PostController {
             Post post = new Post(user, title, description, mediaUrl);
             Post savedPost = postRepository.save(post);
 
+            // Create notifications for all subscribers
+            List<com._blog._blog.entity.Subscription> subscriptions = subscriptionRepository.findBySubscribedTo(user);
+            for (com._blog._blog.entity.Subscription subscription : subscriptions) {
+                User subscriber = subscription.getSubscriber();
+                String message = user.getUsername() + " published a new post: " + title;
+                com._blog._blog.entity.Notification notification = new com._blog._blog.entity.Notification(
+                    subscriber, 
+                    user, 
+                    savedPost, 
+                    "NEW_POST", 
+                    message
+                );
+                notificationRepository.save(notification);
+            }
+
             // Return DTO with username and like info
             return ResponseEntity.ok(postToDTO(savedPost, user));
 
@@ -114,8 +138,11 @@ public class PostController {
     public ResponseEntity<?> getUserPosts(
             @PathVariable String username,
             @AuthenticationPrincipal User currentUser) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Find user or return 404
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found", "message", "User '" + username + "' does not exist"));
+        }
         
         List<Post> posts = postRepository.findByUserOrderByCreatedAtDesc(user);
         
@@ -137,13 +164,28 @@ public class PostController {
                 return ResponseEntity.status(401).body(Map.of("message", "User not authenticated"));
             }
 
+
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new RuntimeException("Post not found"));
 
-            // Check if user owns the post
-            if (!post.getUser().getId().equals(user.getId())) {
+            // Check if user owns the post or is an admin
+            if (!post.getUser().getId().equals(user.getId()) && !user.getRole().equals("ADMIN")) {
                 return ResponseEntity.status(403).body(Map.of("message", "You don't have permission to delete this post"));
             }
+
+
+            // Delete all related data first (to avoid foreign key constraints)
+            // 1. Delete all likes
+            likeRepository.deleteByPost(post);
+
+            // 2. Delete all comments
+            commentRepository.deleteByPost(post);
+
+            // 3. Delete all notifications
+            notificationRepository.deleteByPost(post);
+
+            // 4. Delete all reports
+            reportRepository.deleteByPost(post);
 
             // Delete media file if exists
             if (post.getMediaUrl() != null && !post.getMediaUrl().isEmpty()) {
@@ -155,6 +197,7 @@ public class PostController {
                 }
             }
 
+            // Finally delete the post
             postRepository.delete(post);
             return ResponseEntity.ok(Map.of("message", "Post deleted successfully"));
 
@@ -180,8 +223,8 @@ public class PostController {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new RuntimeException("Post not found"));
             
-            // Check if user owns the post
-            if (!post.getUser().getId().equals(user.getId())) {
+            // Check if user owns the post or is an admin
+            if (!post.getUser().getId().equals(user.getId()) && !user.getRole().equals("ADMIN")) {
                 return ResponseEntity.status(403).body(Map.of("message", "You don't have permission to edit this post"));
             }
 

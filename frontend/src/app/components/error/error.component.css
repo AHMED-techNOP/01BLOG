@@ -1,0 +1,136 @@
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: transparent;
+  padding: 20px;
+}
+
+.error-content {
+  text-align: center;
+  max-width: 600px;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-icon {
+  font-size: 120px;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+  animation: iconAnimation 2s ease-in-out infinite;
+}
+
+/* Different colors for different error types */
+.error-icon.error-403 {
+  color: #ff9800; /* Orange for forbidden */
+}
+
+.error-icon.error-404 {
+  color: #e91e63; /* Pink for not found */
+}
+
+.error-icon.error-500,
+.error-icon.error-503 {
+  color: #f44336; /* Red for server errors */
+}
+
+@keyframes iconAnimation {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.error-code {
+  font-size: 120px;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1;
+  background: linear-gradient(135deg, #e91e63, #ff9800);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
+}
+
+.error-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  margin: 20px 0;
+}
+
+.error-message {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 20px 0 40px 0;
+  line-height: 1.6;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.action-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .error-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+  }
+  
+  .error-code {
+    font-size: 80px;
+  }
+  
+  .error-title {
+    font-size: 28px;
+  }
+  
+  .error-message {
+    font-size: 16px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-buttons button {
+    width: 100%;
+  }
+}

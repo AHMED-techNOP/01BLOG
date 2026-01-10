@@ -22,4 +22,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     
     // Delete a like by post and user
     void deleteByPostAndUser(Post post, User user);
+    
+    // Delete all likes for a post
+    void deleteByPost(Post post);
 }

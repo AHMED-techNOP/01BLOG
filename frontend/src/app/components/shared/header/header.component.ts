@@ -8,6 +8,9 @@ import { CreatePostComponent } from '../create-post/create-post.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatMenuModule } from '@angular/material/menu';
+import { NotificationService, Notification } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +20,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    MatBadgeModule,
+    MatMenuModule,
     CreatePostComponent
   ],
   templateUrl: './header.component.html',
@@ -27,23 +32,29 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isAuthenticated: boolean = false;
   showCreatePost: boolean = false;
   editingPost: any = null;
+  unreadCount: number = 0;
+  notifications: Notification[] = [];
+  isErrorPage: boolean = false;
   private routerSubscription?: Subscription;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private newPostService: NewPostService
+    private newPostService: NewPostService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
     // Check authentication state on init and route changes
     this.updateAuthState();
+    this.checkErrorPage();
     
     // Subscribe to router events to update auth state on navigation
     this.routerSubscription = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.updateAuthState();
+      this.checkErrorPage();
     });
   }
 
@@ -53,13 +64,50 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
+  loadNotifications(): void {
+    this.notificationService.getUnreadNotifications().subscribe({
+      next: (notifications) => {
+        this.notifications = notifications;
+        this.unreadCount = notifications.filter(n => !n.read).length;
+      }
+    });
+  }
+
+  markAsRead(notification: Notification): void {
+    this.notificationService.markAsRead(notification.id).subscribe({
+      next: () => {
+        notification.read = true;
+        this.unreadCount = this.notifications.filter(n => !n.read).length;
+        // Navigate to post if available
+        if (notification.postId) {
+          this.router.navigate(['/dashboard']); // or navigate to specific post
+        }
+      }
+    });
+  }
+
+  markAllAsRead(): void {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications.forEach(n => n.read = true);
+        this.unreadCount = 0;
+      }
+    });
+  }
+
   updateAuthState(): void {
     this.isAuthenticated = this.authService.isLoggedIn;
     if (this.isAuthenticated) {
       this.user = this.authService.getUserInfo();
+      this.loadNotifications();
     } else {
       this.user = null;
+      this.notifications = [];
     }
+  }
+
+  checkErrorPage(): void {
+    this.isErrorPage = this.router.url.startsWith('/error');
   }
 
   viewMyProfile(): void {

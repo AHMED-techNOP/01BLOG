@@ -1,0 +1,23 @@
+<div class="error-container">
+  <div class="error-content">
+    <mat-icon class="error-icon" [ngClass]="'error-' + errorCode">{{ errorIcon }}</mat-icon>
+    <h1 class="error-code">{{ errorCode }}</h1>
+    <h2 class="error-title">{{ errorTitle }}</h2>
+    <p class="error-message">{{ errorMessage }}</p>
+    
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="goHome()">
+        <mat-icon>home</mat-icon>
+        Go to Dashboard
+      </button>
+      <button mat-raised-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Go Back
+      </button>
+      <button mat-raised-button color="accent" (click)="retry()" *ngIf="errorCode >= 500">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
+  </div>
+</div>

@@ -3,19 +3,20 @@
     <button mat-icon-button (click)="goBack()" matTooltip="Back to Dashboard">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <h1>
+    <h2>
       <mat-icon>admin_panel_settings</mat-icon>
       Admin Dashboard
-    </h1>
+    </h2>
   </div>
 
   <mat-tab-group [(selectedIndex)]="selectedTab" class="admin-tabs">
     <!-- Users Tab -->
     <mat-tab>
       <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">people</mat-icon>
-        Users
-        <span class="tab-badge" [matBadge]="users.length" matBadgeSize="small" matBadgeColor="primary"></span>
+        <span class="tab-label-text">
+          <mat-icon class="tab-icon">people</mat-icon>
+          Users
+        </span>
       </ng-template>
       
       <div class="tab-content">
@@ -122,9 +123,10 @@
     <!-- Posts Tab -->
     <mat-tab>
       <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">article</mat-icon>
-        Posts
-        <span class="tab-badge" [matBadge]="posts.length" matBadgeSize="small" matBadgeColor="primary"></span>
+        <span class="tab-label-text">
+          <mat-icon class="tab-icon">article</mat-icon>
+          Posts
+        </span>
       </ng-template>
       
       <div class="tab-content">
@@ -220,9 +222,10 @@
     <!-- Reports Tab -->
     <mat-tab>
       <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">flag</mat-icon>
-        Reports
-        <span class="tab-badge" [matBadge]="reports.length" matBadgeSize="small" matBadgeColor="warn"></span>
+        <span class="tab-label-text">
+          <mat-icon class="tab-icon">flag</mat-icon>
+          Reports
+        </span>
       </ng-template>
       
       <div class="tab-content">

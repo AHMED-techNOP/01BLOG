@@ -1,6 +1,6 @@
 .admin-dashboard {
   min-height: 100vh;
-  padding: 2rem;
+  padding: 80px 2rem 2rem 2rem;
 }
 
 .admin-header {
@@ -11,7 +11,7 @@
   color: white;
 }
 
-.admin-header h1 {
+.admin-header h2 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -37,17 +37,23 @@
 }
 
 .admin-tabs ::ng-deep .mat-mdc-tab-label {
-  color: rgba(255, 255, 255, 0.7);
+  color: white !important;
   font-weight: 500;
 }
 
-.admin-tabs ::ng-deep .mat-mdc-tab-label-active {
-  color: #e91e63;
+
+.tab-label-text {
+  display: flex;
+  align-items: center;
+  color: white !important;
 }
+
 
 .tab-icon {
   margin-right: 0.5rem;
+  color: white !important;
 }
+
 
 .tab-badge {
   margin-left: 0.5rem;

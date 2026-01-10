@@ -22,6 +22,10 @@ public class Notification {
     private User user; // User who receives the notification
     
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actor_id")
+    private User actor; // User who triggered the notification
+    
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post; // Post that triggered the notification
     
@@ -39,8 +43,9 @@ public class Notification {
     private String message;
     
     // Custom constructor
-    public Notification(User user, Post post, String notificationType, String message) {
+    public Notification(User user, User actor, Post post, String notificationType, String message) {
         this.user = user;
+        this.actor = actor;
         this.post = post;
         this.notificationType = notificationType;
         this.message = message;

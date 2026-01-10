@@ -5,6 +5,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { UserSearchComponent } from './components/user-search/user-search.component';
+import { ErrorComponent } from './components/error/error.component';
 import { AuthGuard, GuestGuard } from './services/route.guards';
 
 export const routes: Routes = [
@@ -44,8 +45,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { requiresAdmin: true } // Only allow if logged in AND admin
   },
+  {
+    path: 'error',
+    component: ErrorComponent
+  },
   { 
     path: '**', 
-    redirectTo: '/dashboard' 
+    component: ErrorComponent,
+    data: { code: 404 }
   }
 ];

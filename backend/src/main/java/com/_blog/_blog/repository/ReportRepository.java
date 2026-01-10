@@ -28,4 +28,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     
     // Count pending reports
     long countByStatus(String status);
+    
+    // Delete all reports for a post
+    void deleteByPost(Post post);
 }

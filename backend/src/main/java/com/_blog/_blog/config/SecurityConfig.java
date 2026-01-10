@@ -1,5 +1,7 @@
 package com._blog._blog.config;
 import com._blog._blog.security.JwtAuthenticationFilter;
+import com._blog._blog.security.JwtAuthenticationEntryPoint;
+import com._blog._blog.security.CustomAccessDeniedHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +26,12 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     // Password encoder (BCrypt)
     @Bean
@@ -78,6 +86,12 @@ public class SecurityConfig {
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+            
+            // Handle authentication errors (expired/invalid tokens)
+            .exceptionHandling(exception -> {
+                exception.authenticationEntryPoint(jwtAuthenticationEntryPoint);
+                exception.accessDeniedHandler(customAccessDeniedHandler);
+            })
             
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints (no authentication required)

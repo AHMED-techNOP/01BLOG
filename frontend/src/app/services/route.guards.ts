@@ -26,7 +26,7 @@ export class AuthGuard implements CanActivate {
 
     // Check admin role if required
     if (requiresAdmin && !this.authService.isAdmin()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/error'], { queryParams: { code: 403, message: 'Admin access required' } });
       return false;
     }
 

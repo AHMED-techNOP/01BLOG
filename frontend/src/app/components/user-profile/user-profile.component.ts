@@ -100,8 +100,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load user posts:', error);
-        this.error = 'Failed to load user profile';
         this.loading = false;
+        // 403, 404, 500 errors are handled by auth interceptor (redirects to /error page)
+        // Only handle other errors here
+        if (error.status !== 403 && error.status !== 404 && error.status !== 500) {
+          this.error = 'Failed to load user profile';
+        }
       }
     });
   }
