@@ -31,4 +31,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     
     // Delete all reports for a post
     void deleteByPost(Post post);
+    
+    // Delete all reports by/about a user (for cascade delete)
+    void deleteByReporter(User reporter);
+    void deleteByReportedUser(User reportedUser);
 }

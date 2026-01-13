@@ -107,7 +107,32 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   checkErrorPage(): void {
-    this.isErrorPage = this.router.url.startsWith('/error');
+    // Hide header on error page OR on any invalid route (404 catch-all)
+    const url = this.router.url;
+    this.isErrorPage = url.startsWith('/error') || this.isInvalidRoute(url);
+  }
+
+  isInvalidRoute(url: string): boolean {
+    // List of valid route patterns
+    const validRoutes = [
+      '/login',
+      '/register',
+      '/dashboard',
+      '/profile/',
+      '/users',
+      '/admin'
+    ];
+    
+    // Check if URL matches any valid route pattern
+    const isValid = validRoutes.some(route => {
+      if (route.endsWith('/')) {
+        // For routes like /profile/, check if URL starts with it and has username
+        return url.startsWith(route) && url.split('/').length === 3;
+      }
+      return url === route ;
+    });
+    
+    return !isValid && url !== '/' && url !== '';
   }
 
   viewMyProfile(): void {

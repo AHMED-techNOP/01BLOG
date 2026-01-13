@@ -37,4 +37,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     // Get users IDs that the current user is subscribed to
     @Query("SELECT s.subscribedTo.id FROM Subscription s WHERE s.subscriber.id = :userId")
     List<Long> findSubscribedToUserIds(@Param("userId") Long userId);
+    
+    // Delete all subscriptions by/to a user (for cascade delete)
+    void deleteBySubscriber(User subscriber);
+    void deleteBySubscribedTo(User subscribedTo);
 }
