@@ -7,6 +7,7 @@ import com._blog._blog.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -28,6 +29,15 @@ public class AdminController {
 
     @Autowired
     private SubscriptionRepository subscriptionRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     // ==================== USER MANAGEMENT ====================
 
@@ -90,6 +100,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{userId}")
+    @Transactional
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         try {
             User user = userRepository.findById(userId)
@@ -100,8 +111,33 @@ public class AdminController {
                         .body(Map.of("error", "Cannot delete admin users"));
             }
 
+            // CASCADE DELETE: Delete all related records first
+            
+            // 1. Delete all notifications related to this user (as sender or receiver)
+            notificationRepository.deleteByUser(user);
+            notificationRepository.deleteByActor(user);
+            
+            // 2. Delete all reports by this user or about this user
+            reportRepository.deleteByReporter(user);
+            reportRepository.deleteByReportedUser(user);
+            
+            // 3. Delete all subscriptions (following/followers)
+            subscriptionRepository.deleteBySubscriber(user);
+            subscriptionRepository.deleteBySubscribedTo(user);
+            
+            // 4. Delete all likes by this user
+            likeRepository.deleteByUser(user);
+            
+            // 5. Delete all comments by this user
+            commentRepository.deleteByUser(user);
+            
+            // 6. Delete all posts by this user (this will cascade delete comments on those posts)
+            postRepository.deleteByUser(user);
+            
+            // 7. Finally, delete the user
             userRepository.delete(user);
-            return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
+            
+            return ResponseEntity.ok(Map.of("message", "User and all related data deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

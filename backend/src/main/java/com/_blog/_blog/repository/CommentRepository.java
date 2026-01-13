@@ -18,4 +18,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     
     // Delete all comments for a post
     void deleteByPost(Post post);
+    
+    // Delete all comments by a user (for cascade delete)
+    void deleteByUser(com._blog._blog.entity.User user);
 }

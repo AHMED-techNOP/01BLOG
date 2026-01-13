@@ -28,4 +28,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     
     // Delete all notifications for a post
     void deleteByPost(com._blog._blog.entity.Post post);
+    
+    // Delete all notifications for/from a user (for cascade delete)
+    void deleteByUser(User user);
+    void deleteByActor(User actor);
 }
