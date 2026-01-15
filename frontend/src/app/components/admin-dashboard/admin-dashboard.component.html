@@ -181,15 +181,15 @@
               <td mat-cell *matCellDef="let post">
                 <div class="action-buttons">
                   <button 
-                    *ngIf="!post.isHidden" 
+                    *ngIf="!post.isHidden"
                     mat-icon-button 
-                    color="warn"
+                    color="accent"
                     (click)="hidePost(post)"
                     matTooltip="Hide Post">
                     <mat-icon>visibility_off</mat-icon>
                   </button>
                   <button 
-                    *ngIf="post.isHidden" 
+                    *ngIf="post.isHidden"
                     mat-icon-button 
                     color="primary"
                     (click)="unhidePost(post)"
@@ -275,7 +275,6 @@
               <td mat-cell *matCellDef="let report">
                 <mat-chip 
                   [class.pending-chip]="report.status === 'PENDING'"
-                  [class.reviewed-chip]="report.status === 'REVIEWED'"
                   [class.resolved-chip]="report.status === 'RESOLVED'">
                   {{report.status}}
                 </mat-chip>
@@ -293,14 +292,6 @@
               <th mat-header-cell *matHeaderCellDef>Actions</th>
               <td mat-cell *matCellDef="let report">
                 <div class="action-buttons">
-                  <button 
-                    *ngIf="report.status !== 'REVIEWED'" 
-                    mat-icon-button 
-                    color="primary"
-                    (click)="updateReportStatus(report, 'REVIEWED')"
-                    matTooltip="Mark as Reviewed">
-                    <mat-icon>visibility</mat-icon>
-                  </button>
                   <button 
                     *ngIf="report.status !== 'RESOLVED'" 
                     mat-icon-button 

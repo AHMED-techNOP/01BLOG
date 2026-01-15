@@ -51,6 +51,7 @@ public class AuthService {
 
         // ✨ Generate JWT token with user details (auto-login after registration)
         String jwt = jwtTokenProvider.generateTokenFromUser(
+            savedUser.getId(),
             savedUser.getUsername(),
             savedUser.getEmail(), 
             savedUser.getRole().name()
@@ -79,6 +80,7 @@ public class AuthService {
 
         // ✨ Generate JWT token with user details
         String jwt = jwtTokenProvider.generateTokenFromUser(
+            user.getId(),
             user.getUsername(),
             user.getEmail(),
             user.getRole().name()

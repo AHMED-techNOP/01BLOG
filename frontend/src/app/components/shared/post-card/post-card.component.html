@@ -69,7 +69,9 @@
       <input 
         type="text" 
         [(ngModel)]="post.newComment" 
+        rows="4"
         placeholder="Write a comment..."
+        maxlength="1000"
         (keyup.enter)="onAddComment()">
       <button mat-icon-button color="primary" (click)="onAddComment()">
         <mat-icon>send</mat-icon>

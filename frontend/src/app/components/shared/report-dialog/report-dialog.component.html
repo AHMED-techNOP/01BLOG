@@ -1,7 +1,7 @@
 <div class="report-dialog">
   <h2 mat-dialog-title>
     <mat-icon>flag</mat-icon>
-    Report Post
+    Report Content
   </h2>
 
   <mat-dialog-content>
@@ -14,6 +14,23 @@
       <mat-icon>error</mat-icon>
       <p>{{ errorMessage }}</p>
     </div>
+
+    <!-- Report Type Selection -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>What do you want to report?</mat-label>
+      <mat-select [(ngModel)]="reportType" required>
+        <mat-option value="post">
+          <mat-icon>article</mat-icon>
+          This Post
+        </mat-option>
+        <mat-option value="user">
+          <mat-icon>person</mat-icon>
+          User: {{ '@' + data.postUsername }}
+        </mat-option>
+      </mat-select>
+      <mat-hint *ngIf="reportType === 'post'">Report this specific post for violating guidelines</mat-hint>
+      <mat-hint *ngIf="reportType === 'user'">Report the user's account for problematic behavior</mat-hint>
+    </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Reason for reporting</mat-label>
@@ -30,7 +47,8 @@
         matInput 
         [(ngModel)]="customReason" 
         rows="4"
-        placeholder="Provide details about why you're reporting this post..."
+        placeholder="Provide details about why you're reporting..."
+        maxlength="500"
         required>
       </textarea>
     </mat-form-field>

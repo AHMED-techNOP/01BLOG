@@ -3,6 +3,9 @@
   background: #000000 !important;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.2) !important;
   transition: all 0.3s !important;
+  max-width: 850px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .post-card:hover {
@@ -59,12 +62,16 @@
   font-size: 20px;
   margin-bottom: 12px;
   font-weight: 700;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .post-card p {
   color: #fff;
   line-height: 1.6;
   margin-bottom: 15px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .post-media {

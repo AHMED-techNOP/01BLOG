@@ -33,7 +33,7 @@ public class Report {
     private String reason;
     
     @Column(nullable = false)
-    private String status = "PENDING"; // PENDING, REVIEWED, RESOLVED
+    private String status = "PENDING"; // PENDING, RESOLVED
     
     @Column(nullable = false)
     private LocalDateTime timestamp;

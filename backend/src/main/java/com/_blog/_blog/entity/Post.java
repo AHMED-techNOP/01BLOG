@@ -23,10 +23,10 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
-    @Column(nullable = false)
+    @Column(nullable = false, length = 200)
     private String title;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", length = 5000)
     private String description;
     
     @Column(name = "media_url")
@@ -36,7 +36,7 @@ public class Post {
     private LocalDateTime createdAt = LocalDateTime.now();
     
     @Column(name = "is_hidden", nullable = false)
-    private boolean hidden = false;
+    private boolean isHidden = false;
     
     // One-to-many relationships
     @JsonIgnore

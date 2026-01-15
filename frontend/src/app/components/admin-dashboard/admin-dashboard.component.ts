@@ -152,7 +152,28 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  deletePost(post: AdminPost): void {
+    if (!confirm(`Are you sure you want to DELETE this post? This action cannot be undone!`)) {
+      return;
+    }
+
+    this.adminService.deletePost(post.id).subscribe({
+      next: () => {
+        this.posts = this.posts.filter(p => p.id !== post.id);
+        alert('Post has been deleted');
+      },
+      error: (error) => {
+        console.error('Failed to delete post:', error);
+        alert('Failed to delete post');
+      }
+    });
+  }
+
   hidePost(post: AdminPost): void {
+    if (!confirm(`Are you sure you want to HIDE this post? It will be hidden from all users.`)) {
+      return;
+    }
+
     this.adminService.hidePost(post.id).subscribe({
       next: () => {
         post.isHidden = true;
@@ -174,23 +195,6 @@ export class AdminDashboardComponent implements OnInit {
       error: (error) => {
         console.error('Failed to unhide post:', error);
         alert('Failed to unhide post');
-      }
-    });
-  }
-
-  deletePost(post: AdminPost): void {
-    if (!confirm(`Are you sure you want to DELETE this post? This action cannot be undone!`)) {
-      return;
-    }
-
-    this.adminService.deletePost(post.id).subscribe({
-      next: () => {
-        this.posts = this.posts.filter(p => p.id !== post.id);
-        alert('Post has been deleted');
-      },
-      error: (error) => {
-        console.error('Failed to delete post:', error);
-        alert('Failed to delete post');
       }
     });
   }
@@ -247,9 +251,9 @@ export class AdminDashboardComponent implements OnInit {
 
   getReportedEntity(report: AdminReport): string {
     if (report.postId) {
-      return `Post: ${report.postTitle || '#' + report.postId}`;
+      return `Post ID: ${report.postId}`;
     }
-    return `User: ${report.reportedUsername || 'Unknown'}`;
+    return `User ID: ${report.reportedUserId || 'Unknown'}`;
   }
 
   formatDate(dateString: string): string {

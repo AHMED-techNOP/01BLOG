@@ -85,6 +85,11 @@ export class PostManagementService {
    * Delete a comment from a post
    */
   deleteComment(post: Post, comment: Comment): void {
+    // Confirm before deleting
+    if (!confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+
     this.apiService.deleteComment(post.id, comment.id).subscribe({
       next: (response) => {
         if (post.comments) {

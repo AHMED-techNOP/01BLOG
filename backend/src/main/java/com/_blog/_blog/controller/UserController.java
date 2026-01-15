@@ -52,13 +52,10 @@ public class UserController {
         
         // Fetch posts only from subscribed users, or all posts if not subscribed to anyone
         List<Post> posts;
-        if (subscribedUserIds.isEmpty()) {
-            // If user is not subscribed to anyone, show all posts (excluding hidden ones)
-            posts = postRepository.findByHiddenFalseOrderByCreatedAtDesc();
-        } else {
-            posts = postRepository.findByUserIdInOrderByCreatedAtDesc(subscribedUserIds);
-        }
         
+                posts = postRepository.findByUserIdInAndIsHiddenFalseOrderByCreatedAtDesc(subscribedUserIds);
+            
+
         // Convert to DTOs to avoid lazy loading issues and include username and like info
         List<Map<String, Object>> postDTOs = posts.stream().map(post -> {
             Map<String, Object> dto = new HashMap<>();

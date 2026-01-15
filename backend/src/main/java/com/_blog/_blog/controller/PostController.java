@@ -65,6 +65,21 @@ public class PostController {
                 return ResponseEntity.status(401).body(Map.of("message", "User not authenticated"));
             }
 
+            // Validate title length
+            if (title == null || title.trim().isEmpty()) {
+                return ResponseEntity.status(400).body(Map.of("message", "Title is required"));
+            }
+            if (title.length() > 200) {
+                return ResponseEntity.status(400).body(Map.of("message", "Title must not exceed 200 characters"));
+            }
+            if (description == null || description.trim().isEmpty()) {
+                return ResponseEntity.status(400).body(Map.of("message", "Description is required"));
+            }
+            // Validate description length
+            if (description != null && description.length() > 5000) {
+                return ResponseEntity.status(400).body(Map.of("message", "Description must not exceed 5000 characters"));
+            }
+
             System.out.println("User found: " + user.getUsername());
 
             String mediaUrl = null;
@@ -122,8 +137,10 @@ public class PostController {
     @GetMapping
     @Transactional
     public ResponseEntity<?> getAllPosts(@AuthenticationPrincipal User user) {
-        // Get all posts excluding hidden ones
-        List<Post> posts = postRepository.findByHiddenFalseOrderByCreatedAtDesc();
+        List<Post> posts;
+        
+            posts = postRepository.findByIsHiddenFalseOrderByCreatedAtDesc();
+        
         
         // Convert to DTOs to include username and like info
         List<Map<String, Object>> postDTOs = posts.stream()
@@ -144,7 +161,11 @@ public class PostController {
             return ResponseEntity.status(404).body(Map.of("error", "User not found", "message", "User '" + username + "' does not exist"));
         }
         
-        List<Post> posts = postRepository.findByUserOrderByCreatedAtDesc(user);
+        // Get user's posts (admins see all, regular users don't see hidden posts)
+        List<Post> posts;
+       
+            posts = postRepository.findByUserAndIsHiddenFalseOrderByCreatedAtDesc(user);
+        
         
         // Convert to DTOs to include username and like info
         List<Map<String, Object>> postDTOs = posts.stream()
@@ -218,6 +239,19 @@ public class PostController {
         try {
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("message", "User not authenticated"));
+            }
+            
+            // Validate title length
+            if (title == null || title.trim().isEmpty()) {
+                return ResponseEntity.status(400).body(Map.of("message", "Title is required"));
+            }
+            if (title.length() > 200) {
+                return ResponseEntity.status(400).body(Map.of("message", "Title must not exceed 200 characters"));
+            }
+
+            // Validate description length
+            if (description != null && description.length() > 5000) {
+                return ResponseEntity.status(400).body(Map.of("message", "Description must not exceed 5000 characters"));
             }
             
             Post post = postRepository.findById(postId)
@@ -407,6 +441,11 @@ public class PostController {
             String content = request.get("content");
             if (content == null || content.trim().isEmpty()) {
                 return ResponseEntity.status(400).body(Map.of("message", "Comment content cannot be empty"));
+            }
+            
+            // Validate comment length
+            if (content.length() > 1000) {
+                return ResponseEntity.status(400).body(Map.of("message", "Comment must not exceed 1000 characters"));
             }
 
             Post post = postRepository.findById(postId)

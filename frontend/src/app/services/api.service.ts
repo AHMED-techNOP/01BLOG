@@ -172,8 +172,8 @@ export class ApiService {
     );
   }
 
-  // Report a post
-  reportPost(reportData: { postId: number; reason: string }): Observable<any> {
+  // Report a post or user
+  reportPost(reportData: { postId: number; reportType: 'post' | 'user'; reason: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/reports`, reportData);
   }
 }
