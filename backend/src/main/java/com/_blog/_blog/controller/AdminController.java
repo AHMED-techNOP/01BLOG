@@ -10,6 +10,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -168,6 +172,44 @@ public class AdminController {
         }
     }
 
+    @DeleteMapping("/posts/{postId}")
+    @Transactional
+    public ResponseEntity<?> deletePost(@PathVariable Long postId) {
+        try {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            // CASCADE DELETE: Delete all related records first (to avoid foreign key constraints)
+            // 1. Delete all likes
+            likeRepository.deleteByPost(post);
+
+            // 2. Delete all comments
+            commentRepository.deleteByPost(post);
+
+            // 3. Delete all notifications
+            notificationRepository.deleteByPost(post);
+
+            // 4. Delete all reports
+            reportRepository.deleteByPost(post);
+
+            // 5. Delete media file if exists
+            if (post.getMediaUrl() != null && !post.getMediaUrl().isEmpty()) {
+                try {
+                    Path filePath = Paths.get("uploads/" + post.getMediaUrl().substring(post.getMediaUrl().lastIndexOf("/") + 1));
+                    Files.deleteIfExists(filePath);
+                } catch (IOException e) {
+                    System.err.println("Failed to delete media file: " + e.getMessage());
+                }
+            }
+
+            // 6. Finally delete the post
+            postRepository.delete(post);
+            return ResponseEntity.ok(Map.of("message", "Post deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/posts/{postId}/hide")
     public ResponseEntity<?> hidePost(@PathVariable Long postId) {
         try {
@@ -193,19 +235,6 @@ public class AdminController {
             postRepository.save(post);
 
             return ResponseEntity.ok(Map.of("message", "Post unhidden successfully"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    @DeleteMapping("/posts/{postId}")
-    public ResponseEntity<?> deletePost(@PathVariable Long postId) {
-        try {
-            Post post = postRepository.findById(postId)
-                    .orElseThrow(() -> new RuntimeException("Post not found"));
-
-            postRepository.delete(post);
-            return ResponseEntity.ok(Map.of("message", "Post deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -261,9 +290,9 @@ public class AdminController {
             }
 
             // Validate status
-            if (!status.equals("PENDING") && !status.equals("REVIEWED") && !status.equals("RESOLVED")) {
+            if (!status.equals("PENDING") && !status.equals("RESOLVED")) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("error", "Invalid status. Must be PENDING, REVIEWED, or RESOLVED"));
+                        .body(Map.of("error", "Invalid status. Must be PENDING or RESOLVED"));
             }
 
             report.setStatus(status);

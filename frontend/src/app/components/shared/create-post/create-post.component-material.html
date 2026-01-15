@@ -17,9 +17,11 @@
           [(ngModel)]="title"
           name="title"
           placeholder="Enter post title..."
+          [maxlength]="MAX_TITLE_LENGTH"
           required
         />
         <mat-icon matPrefix>title</mat-icon>
+        <mat-hint align="end">{{title.length}} / {{MAX_TITLE_LENGTH}}</mat-hint>
       </mat-form-field>
 
       <!-- Content Textarea - Material -->
@@ -31,11 +33,13 @@
           name="content"
           placeholder="What's on your mind?"
           rows="6"
+          [maxlength]="MAX_DESCRIPTION_LENGTH"
           required
         ></textarea>
         <mat-icon matPrefix>description</mat-icon>
+        <mat-hint align="end">{{content.length}} / {{MAX_DESCRIPTION_LENGTH}}</mat-hint>
       </mat-form-field>
-
+      
       <!-- Media Upload -->
       <div class="form-group">
         <label>Media (Image or Video)</label>

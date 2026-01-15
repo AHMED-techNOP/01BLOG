@@ -42,6 +42,10 @@ export class CreatePostComponent implements OnChanges {
   // Max file size: 10MB for images, 50MB for videos
   private readonly MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
   private readonly MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+  
+  // Max character lengths
+  readonly MAX_TITLE_LENGTH = 200;
+  readonly MAX_DESCRIPTION_LENGTH = 5000;
 
   constructor(private apiService: ApiService) {}
 
@@ -125,8 +129,18 @@ export class CreatePostComponent implements OnChanges {
       return;
     }
 
+    if (this.title.length > this.MAX_TITLE_LENGTH) {
+      this.error = `Title must not exceed ${this.MAX_TITLE_LENGTH} characters`;
+      return;
+    }
+
     if (!this.content.trim()) {
       this.error = 'Content is required';
+      return;
+    }
+
+    if (this.content.length > this.MAX_DESCRIPTION_LENGTH) {
+      this.error = `Description must not exceed ${this.MAX_DESCRIPTION_LENGTH} characters`;
       return;
     }
 

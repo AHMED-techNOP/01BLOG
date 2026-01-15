@@ -142,14 +142,17 @@ mat-chip {
   color: white !important;
 }
 
-.reviewed-chip {
-  background: #2196f3 !important;
-  color: white !important;
-}
-
 .resolved-chip {
   background: #4caf50 !important;
   color: white !important;
+}
+
+/* Report reason column - limit width and wrap text */
+.admin-table ::ng-deep .mat-column-reason {
+  max-width: 300px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .no-data {

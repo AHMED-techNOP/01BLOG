@@ -67,16 +67,16 @@ export class AdminService {
     return this.http.get<AdminPost[]>(`${this.apiUrl}/posts`);
   }
 
+  deletePost(postId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/posts/${postId}`);
+  }
+
   hidePost(postId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/posts/${postId}/hide`, {});
   }
 
   unhidePost(postId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/posts/${postId}/unhide`, {});
-  }
-
-  deletePost(postId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/posts/${postId}`);
   }
 
   // Reports

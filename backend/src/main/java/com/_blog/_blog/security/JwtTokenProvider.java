@@ -23,12 +23,13 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    // Generate JWT token with user details (email, role) 
-    public String generateTokenFromUser(String username, String email, String role) {
+    // Generate JWT token with user details (id, email, role) 
+    public String generateTokenFromUser(Long userId, String username, String email, String role) {
         Date expiryDate = new Date(System.currentTimeMillis() + jwtExpirationInMs);
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("id", userId)
                 .claim("email", email)
                 .claim("role", role)
                 .setIssuedAt(new Date())

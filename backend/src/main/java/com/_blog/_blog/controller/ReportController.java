@@ -23,7 +23,7 @@ public class ReportController {
     private PostRepository postRepository;
 
     /**
-     * Submit a report for a post
+     * Submit a report for a post or user
      */
     @PostMapping
     public ResponseEntity<?> reportPost(
@@ -47,29 +47,57 @@ public class ReportController {
                         .body(Map.of("error", "Missing reason field"));
             }
             
+            if (!reportData.containsKey("reportType")) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Missing reportType field"));
+            }
+            
             Long postId = Long.valueOf(reportData.get("postId").toString());
             String reason = reportData.get("reason").toString();
+            String reportType = reportData.get("reportType").toString(); // 'post' or 'user'
+            
+            // Validate reason length
+            if (reason == null || reason.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Reason cannot be empty"));
+            }
+            if (reason.length() > 500) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Reason must not exceed 500 characters"));
+            }
             
             
             // Find the post
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new RuntimeException("Post not found"));
+            
+            User postAuthor = post.getUser();
                         
-            // Check if user is trying to report their own post
-            if (post.getUser().getId().equals(user.getId())) {
+            // Check if user is trying to report their own post/user
+            if (postAuthor.getId().equals(user.getId())) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("error", "You cannot report your own post"));
+                        .body(Map.of("error", "You cannot report your own content"));
             }
             
-            // Create and save the report
-            Report report = new Report(user, post, reason);
-            report.setReportedUser(post.getUser()); // Set the post's author as the reported user
+            // Create and save the report based on type
+            Report report;
+            if ("user".equals(reportType)) {
+                // Report the user
+                report = new Report(user, postAuthor, reason);
+                report.setPost(null); // No specific post, just user report
+            } else {
+                // Report the post (default)
+                report = new Report(user, post, reason);
+                report.setReportedUser(postAuthor); // Also set the post's author as reported user
+            }
+            
             report.setStatus("PENDING");
             reportRepository.save(report);
                         
             return ResponseEntity.ok(Map.of(
                     "message", "Report submitted successfully",
                     "reportId", report.getId(),
+                    "reportType", reportType,
                     "status", report.getStatus()
             ));
             

@@ -32,6 +32,7 @@ export interface ReportDialogData {
   styleUrl: './report-dialog.component.css'
 })
 export class ReportDialogComponent {
+  reportType: 'post' | 'user' = 'post'; // Default to reporting the post
   reason: string = '';
   customReason: string = '';
   loading: boolean = false;
@@ -66,8 +67,19 @@ export class ReportDialogComponent {
       return;
     }
 
+    
     if (this.reason === 'Other' && !this.customReason.trim()) {
       this.errorMessage = 'Please provide a reason for reporting';
+      return;
+    }
+    if (this.customReason.length > 500) {
+      this.errorMessage = 'Custom reason must not exceed 500 characters';
+      return;
+    }
+
+    // Final confirmation before submitting the report
+    const target = this.reportType === 'post' ? 'this post' : `user @${this.data.postUsername}`;
+    if (!confirm(`Are you sure you want to report ${target}? This will be reviewed by administrators.`)) {
       return;
     }
 
@@ -75,6 +87,7 @@ export class ReportDialogComponent {
 
     const reportData = {
       postId: this.data.postId,
+      reportType: this.reportType, // Add report type
       reason: this.reason === 'Other' ? this.customReason.trim() : this.reason
     };
 

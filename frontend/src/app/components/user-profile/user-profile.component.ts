@@ -149,7 +149,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   onPostDeleted(postId: number): void {
-    // Delete the post directly
+    // Confirm before deleting
+    if (!confirm('Are you sure you want to delete this post? This action cannot be undone!')) {
+      return;
+    }
+
+    // Delete the post
     this.apiService.deletePost(postId).subscribe({
       next: () => {
         this.posts = this.posts.filter(p => p.id !== postId);
